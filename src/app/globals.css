@@ -1,0 +1,48 @@
+@import 'tailwindcss';
+
+:root {
+  /* Flexoki Light */
+  --bg: #fffcf0;
+  --bg-2: #f2f0e5;
+  --tx: #100f0f;
+  --tx-2: #6f6e69;
+  --tx-3: #b7b5ac;
+  --ui: #e6e4d9;
+  --ui-2: #dad8ce;
+
+  --red: #af3029;
+  --orange: #bc5215;
+  --yellow: #ad8301;
+  --green: #66800b;
+  --cyan: #24837b;
+  --blue: #205ea6;
+  --purple: #5e409d;
+  --magenta: #a02f6f;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Flexoki Dark */
+    --bg: #100f0f;
+    --bg-2: #1c1b1a;
+    --tx: #fffcf0;
+    --tx-2: #878580;
+    --tx-3: #575653;
+    --ui: #282726;
+    --ui-2: #343331;
+
+    --red: #d14d41;
+    --orange: #da702c;
+    --yellow: #d0a215;
+    --green: #879a39;
+    --cyan: #3aa99f;
+    --blue: #4385be;
+    --purple: #8b7ec8;
+    --magenta: #ce5d97;
+  }
+}
+
+body {
+  background: var(--bg);
+  color: var(--tx);
+}
