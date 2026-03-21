@@ -9,23 +9,25 @@
     "start": "next start",
     "lint": "eslint",
     "analyze": "node lib/index.mjs",
-    "sync": "node lib/sync.mjs"
+    "sync": "node lib/sync.mjs",
+    "db:sync": "node lib/db.mjs"
   },
   "dependencies": {
+    "@libsql/client": "^0.17.2",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },
   "devDependencies": {
+    "@garmin/fitsdk": "^21.195.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "garmin-connect": "^1.6.2",
     "tailwindcss": "^4",
-    "typescript": "^5",
-    "@garmin/fitsdk": "^21.195.0",
-    "garmin-connect": "^1.6.2"
+    "typescript": "^5"
   }
 }
