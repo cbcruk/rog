@@ -2,9 +2,11 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { Noto_Sans_KR, Geist } from 'next/font/google'
 import type { RootLayoutProps } from './layout.types'
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import { MainLayout } from '@/components/layout'
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({ subsets: ['latin'], variable: '--font-sans' })
 
 const notoSans = Noto_Sans_KR({
   weight: ['400', '500', '900'],
@@ -16,10 +18,14 @@ export const metadata: Metadata = {
   description: 'Bakken 노르웨이 모델 기반 러닝 훈련 분석 및 코칭',
 }
 
-export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
+export default function RootLayout({ children }: Readonly<RootLayoutProps>): React.ReactElement {
   return (
-    <html lang="ko" className={cn("font-sans", geist.variable)}>
-      <body className={`${notoSans.className} antialiased`}>{children}</body>
+    <html lang="ko" className={cn('font-sans', geist.variable)}>
+      <body className={`${notoSans.className} antialiased`}>
+        <TooltipProvider>
+          <MainLayout>{children}</MainLayout>
+        </TooltipProvider>
+      </body>
     </html>
   )
 }
