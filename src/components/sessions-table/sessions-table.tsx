@@ -24,6 +24,7 @@ import type { SessionWithFeedback } from '@/types/running'
 import {
   formatWeekRange,
   getISOWeek,
+  getLocationLabel,
   getSessionTypeColor,
   getSessionTypeLabel,
   getWeekRange,
@@ -278,7 +279,14 @@ function WeeklyCalendar({ group }: { group: WeekGroup }): React.ReactElement {
                     <TooltipContent side="bottom" className="tabular-nums">
                       <div className="flex flex-col gap-1 py-0.5">
                         <div className="flex items-center justify-between gap-4">
-                          <span className="font-medium">{typeLabel}</span>
+                          <span className="font-medium">
+                            {typeLabel}
+                            {getLocationLabel(session) && (
+                              <span className="ml-1 font-normal text-background/50">
+                                · {getLocationLabel(session)}
+                              </span>
+                            )}
+                          </span>
                           <span className="text-background/60">
                             {session.summary.duration}
                           </span>
