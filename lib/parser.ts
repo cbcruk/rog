@@ -1,8 +1,18 @@
 import { Decoder, Stream } from '@garmin/fitsdk'
 import { readFileSync, existsSync } from 'fs'
 import { basename, dirname, join } from 'path'
+import type { FitSession, Metadata, FitRecord, FitLap } from '@/types/running'
 
-export function loadMetadata(fitFilePath) {
+interface FitData {
+  session: FitSession
+  laps: FitLap[]
+  records: FitRecord[]
+  timeInZone: Record<string, unknown>[]
+  hrv: Record<string, unknown>[]
+  metadata: Partial<Metadata> | null
+}
+
+export function loadMetadata(fitFilePath: string): Partial<Metadata> | null {
   const dir = dirname(fitFilePath)
   const fitName = basename(fitFilePath, '.fit')
   const parts = fitName.split('_')
@@ -18,7 +28,7 @@ export function loadMetadata(fitFilePath) {
       try {
         const content = readFileSync(metaPath, 'utf-8')
         return JSON.parse(content)
-      } catch (e) {
+      } catch {
         console.warn(`Failed to load metadata: ${metaPath}`)
       }
     }
@@ -26,7 +36,7 @@ export function loadMetadata(fitFilePath) {
   return null
 }
 
-export function parseFitFile(filePath) {
+export function parseFitFile(filePath: string): FitData {
   const buffer = readFileSync(filePath)
   const stream = Stream.fromBuffer(buffer)
   const decoder = new Decoder(stream)
@@ -48,9 +58,9 @@ export function parseFitFile(filePath) {
   const metadata = loadMetadata(filePath)
 
   return {
-    session: messages.sessionMesgs?.[0],
-    laps: messages.lapMesgs || [],
-    records: messages.recordMesgs || [],
+    session: messages.sessionMesgs?.[0] as FitSession,
+    laps: (messages.lapMesgs || []) as FitLap[],
+    records: (messages.recordMesgs || []) as FitRecord[],
     timeInZone: messages.timeInZoneMesgs || [],
     hrv: messages.hrvMesgs || [],
     metadata,

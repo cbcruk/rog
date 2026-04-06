@@ -17,7 +17,7 @@ function createDbClient() {
 
 const db = createDbClient()
 
-export async function initDb() {
+export async function initDb(): Promise<void> {
   await db.execute(`
     CREATE TABLE IF NOT EXISTS sessions (
       id TEXT PRIMARY KEY,
@@ -73,8 +73,8 @@ export async function initDb() {
   await initDefaultSettings()
 }
 
-async function initDefaultSettings() {
-  const defaults = [
+async function initDefaultSettings(): Promise<void> {
+  const defaults: [string, string][] = [
     ['lthr', '165'],
     ['rest_hr', '50'],
     ['max_hr', '185'],
@@ -89,29 +89,56 @@ async function initDefaultSettings() {
   }
 }
 
-export async function getSetting(key) {
+export async function getSetting(key: string): Promise<string | null> {
   const result = await db.execute({
     sql: `SELECT value FROM user_settings WHERE key = ?`,
     args: [key],
   })
-  return result.rows[0]?.value ?? null
+  return (result.rows[0]?.value as string) ?? null
 }
 
-export async function setSetting(key, value) {
+export async function setSetting(
+  key: string,
+  value: string | number,
+): Promise<void> {
   await db.execute({
     sql: `INSERT OR REPLACE INTO user_settings (key, value) VALUES (?, ?)`,
     args: [key, String(value)],
   })
 }
 
-export async function getAllSettings() {
+export async function getAllSettings(): Promise<Record<string, string>> {
   const result = await db.execute(`SELECT key, value FROM user_settings`)
-  return Object.fromEntries(result.rows.map((row) => [row.key, row.value]))
+  return Object.fromEntries(
+    result.rows.map((row) => [row.key, row.value as string]),
+  )
 }
 
-export async function upsertSession(analysis) {
+interface AnalysisInput {
+  date: string
+  startTime: string
+  sport?: string
+  summary: {
+    distance: number
+    durationSeconds: number
+    avgPace: string | null
+    avgHeartRate: number
+    maxHeartRate: number
+    calories: number
+    avgCadence: number | null
+  }
+  splits?: { type: string; diffSeconds: number }
+  consistency?: { cv: number; rating: string }
+  heartRate?: { drift: number } | null
+  fatigue?: { dropSeconds: number } | null
+  elevation?: { totalAscent: number; totalDescent: number }
+  tss?: { rtss: number | null; intensityFactor: number | null }
+}
+
+export async function upsertSession(analysis: AnalysisInput): Promise<void> {
   const id = `${analysis.date}_${analysis.startTime}`
-  const { summary, splits, consistency, heartRate, fatigue, elevation, tss } = analysis
+  const { summary, splits, consistency, heartRate, fatigue, elevation, tss } =
+    analysis
 
   await db.execute({
     sql: `
@@ -149,7 +176,14 @@ export async function upsertSession(analysis) {
   })
 }
 
-export async function syncAllSessions(options = {}) {
+interface SyncOptions {
+  recalculateTSS?: boolean
+  calculatePMC?: boolean
+}
+
+export async function syncAllSessions(
+  options: SyncOptions = {},
+): Promise<void> {
   await initDb()
 
   if (!existsSync(RESULTS_DIR)) {
@@ -172,7 +206,8 @@ export async function syncAllSessions(options = {}) {
       const analysis = JSON.parse(readFileSync(dataPath, 'utf-8'))
 
       if (options.recalculateTSS && !analysis.tss) {
-        const { calculateSessionTSS, getTSSZone } = await import('./tss-calculator.mjs')
+        const { calculateSessionTSS, getTSSZone } =
+          await import('./tss-calculator.ts')
         const tssResult = calculateSessionTSS(analysis.summary, settings)
         const tssZone = getTSSZone(tssResult.rtss)
         analysis.tss = {
@@ -186,20 +221,21 @@ export async function syncAllSessions(options = {}) {
 
       await upsertSession(analysis)
       synced++
-    } catch (e) {
-      console.error(`Failed to sync ${dir}: ${e.message}`)
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e)
+      console.error(`Failed to sync ${dir}: ${message}`)
     }
   }
 
   console.log(`Synced ${synced} sessions to database`)
 
   if (options.calculatePMC) {
-    const { calculateAndStorePMC } = await import('./pmc-calculator.mjs')
+    const { calculateAndStorePMC } = await import('./pmc-calculator.ts')
     await calculateAndStorePMC()
   }
 }
 
-export async function getSeasonStats(fromDate, toDate) {
+export async function getSeasonStats(fromDate: string, toDate: string) {
   const result = await db.execute({
     sql: `
       SELECT
@@ -217,7 +253,7 @@ export async function getSeasonStats(fromDate, toDate) {
   return result.rows[0]
 }
 
-export async function getWeeklyVolume(weeks = 12) {
+export async function getWeeklyVolume(weeks: number = 12) {
   const result = await db.execute({
     sql: `
       SELECT
@@ -248,14 +284,17 @@ export async function getConsecutiveHardSessions() {
   `)
   return result.rows.filter((row) => {
     if (!row.prev_date) return false
-    const curr = new Date(row.date)
-    const prev = new Date(row.prev_date)
-    const diffDays = (curr - prev) / (1000 * 60 * 60 * 24)
+    const curr = new Date(row.date as string)
+    const prev = new Date(row.prev_date as string)
+    const diffDays = (curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24)
     return diffDays <= 1
   })
 }
 
-export async function getSimilarSessions(distance, tolerance = 2) {
+export async function getSimilarSessions(
+  distance: number,
+  tolerance: number = 2,
+) {
   const result = await db.execute({
     sql: `
       SELECT date, distance, avg_pace, avg_hr, consistency_cv, split_type
@@ -269,7 +308,7 @@ export async function getSimilarSessions(distance, tolerance = 2) {
   return result.rows
 }
 
-export async function getRecentSessions(limit = 10) {
+export async function getRecentSessions(limit: number = 10) {
   const result = await db.execute({
     sql: `
       SELECT date, distance, avg_pace, avg_hr, consistency_rating, split_type
@@ -282,7 +321,7 @@ export async function getRecentSessions(limit = 10) {
   return result.rows
 }
 
-export async function getMonthlyTrend(months = 6) {
+export async function getMonthlyTrend(months: number = 6) {
   const result = await db.execute({
     sql: `
       SELECT
@@ -301,7 +340,7 @@ export async function getMonthlyTrend(months = 6) {
   return result.rows
 }
 
-export async function getDailyTSS(fromDate, toDate) {
+export async function getDailyTSS(fromDate: string, toDate: string) {
   const result = await db.execute({
     sql: `
       SELECT date, SUM(rtss) as total_tss, COUNT(*) as sessions_count
@@ -315,17 +354,35 @@ export async function getDailyTSS(fromDate, toDate) {
   return result.rows
 }
 
-export async function upsertDailyMetrics(date, metrics) {
+interface DailyMetricsInput {
+  ctl: number
+  atl: number
+  tsb: number
+  totalTss: number
+  sessionsCount: number
+}
+
+export async function upsertDailyMetrics(
+  date: string,
+  metrics: DailyMetricsInput,
+): Promise<void> {
   await db.execute({
     sql: `
       INSERT OR REPLACE INTO daily_metrics (date, ctl, atl, tsb, total_tss, sessions_count)
       VALUES (?, ?, ?, ?, ?, ?)
     `,
-    args: [date, metrics.ctl, metrics.atl, metrics.tsb, metrics.totalTss, metrics.sessionsCount],
+    args: [
+      date,
+      metrics.ctl,
+      metrics.atl,
+      metrics.tsb,
+      metrics.totalTss,
+      metrics.sessionsCount,
+    ],
   })
 }
 
-export async function getDailyMetrics(fromDate, toDate) {
+export async function getDailyMetrics(fromDate: string, toDate: string) {
   const result = await db.execute({
     sql: `
       SELECT date, ctl, atl, tsb, total_tss, sessions_count
@@ -358,9 +415,9 @@ export async function getAllSessionsForPMC() {
   return result.rows
 }
 
-if (process.argv[1]?.includes('db.mjs')) {
+if (process.argv[1]?.includes('db')) {
   const args = process.argv.slice(2)
-  const options = {
+  const options: SyncOptions = {
     recalculateTSS: args.includes('--tss'),
     calculatePMC: args.includes('--pmc') || args.includes('--tss'),
   }

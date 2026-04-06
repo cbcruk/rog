@@ -1,20 +1,21 @@
 import { readdirSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { join, basename } from 'path'
-import { parseFitFile } from './parser.mjs'
-import { analyzeRun } from './analyzer.mjs'
-import { initDb, upsertSession, getAllSettings } from './db.mjs'
-import { calculateAndStorePMC } from './pmc-calculator.mjs'
+import { parseFitFile } from './parser.ts'
+import { analyzeRun } from './analyzer.ts'
+import { initDb, upsertSession, getAllSettings } from './db.ts'
+import { calculateAndStorePMC } from './pmc-calculator.ts'
+type Analysis = ReturnType<typeof analyzeRun>
 
 const DATA_DIR = join(process.cwd(), 'data')
 const RESULTS_DIR = join(process.cwd(), 'results')
 
-function ensureDir(dir) {
+function ensureDir(dir: string): void {
   if (!existsSync(dir)) {
     mkdirSync(dir, { recursive: true })
   }
 }
 
-function getOutputDir(analysis) {
+function getOutputDir(analysis: { startTime: string }): string {
   const startTime = new Date(analysis.startTime)
   const year = startTime.getFullYear()
   const month = String(startTime.getMonth() + 1).padStart(2, '0')
@@ -24,8 +25,21 @@ function getOutputDir(analysis) {
   return `${year}-${month}-${day}_${hours}${minutes}`
 }
 
-function generateMarkdown(analysis) {
-  const { summary, splits, segments, laps, consistency, highlights, heartRate, fatigue, elevation, intervals, metadata, tss } = analysis
+function generateMarkdown(analysis: Analysis): string {
+  const {
+    summary,
+    splits,
+    segments,
+    laps,
+    consistency,
+    highlights,
+    heartRate,
+    fatigue,
+    elevation,
+    intervals,
+    metadata,
+    tss,
+  } = analysis
 
   let md = `# ${analysis.date} Running Report
 
@@ -142,7 +156,17 @@ ${intervals.sets.map((s) => `| ${s.set} | ${s.work.avgHR || '-'} | ${s.work.maxH
   return md
 }
 
-function processFile(filePath, settings = {}) {
+interface ProcessResult {
+  success: boolean
+  output?: string
+  error?: string
+  analysis: Analysis | null
+}
+
+function processFile(
+  filePath: string,
+  settings: Record<string, string> = {},
+): ProcessResult {
   const filename = basename(filePath)
   console.log(`\nProcessing: ${filename}`)
 
@@ -159,7 +183,10 @@ function processFile(filePath, settings = {}) {
     const outputDir = join(RESULTS_DIR, getOutputDir(analysis))
     ensureDir(outputDir)
 
-    writeFileSync(join(outputDir, 'data.json'), JSON.stringify(analysis, null, 2))
+    writeFileSync(
+      join(outputDir, 'data.json'),
+      JSON.stringify(analysis, null, 2),
+    )
     writeFileSync(join(outputDir, 'spec.md'), generateMarkdown(analysis))
 
     const dirName = getOutputDir(analysis)
@@ -167,19 +194,22 @@ function processFile(filePath, settings = {}) {
 
     printSummary(analysis)
     return { success: true, output: dirName, analysis }
-  } catch (error) {
-    console.error(`  Error: ${error.message}`)
-    return { success: false, error: error.message, analysis: null }
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
+    console.error(`  Error: ${message}`)
+    return { success: false, error: message, analysis: null }
   }
 }
 
-function printSummary(analysis) {
+function printSummary(analysis: Analysis): void {
   const { summary, splits, consistency, metadata, intervals, tss } = analysis
   console.log(`  Distance: ${summary.distance}km`)
   console.log(`  Duration: ${summary.duration}`)
   console.log(`  Avg Pace: ${summary.avgPace}/km`)
   console.log(`  Avg HR: ${summary.avgHeartRate} bpm`)
-  console.log(`  Split: ${splits.type} (${splits.diffSeconds > 0 ? '+' : ''}${splits.diffSeconds}s)`)
+  console.log(
+    `  Split: ${splits.type} (${splits.diffSeconds > 0 ? '+' : ''}${splits.diffSeconds}s)`,
+  )
   console.log(`  Consistency: ${consistency.rating} (CV: ${consistency.cv}%)`)
   if (tss?.rtss) {
     console.log(`  TSS: ${tss.rtss} (${tss.zoneLabel})`)
@@ -188,11 +218,13 @@ function printSummary(analysis) {
     console.log(`  Type: ${metadata.type} (${metadata.location})`)
   }
   if (intervals) {
-    console.log(`  Intervals: ${intervals.totalSets}/${intervals.targetSets} sets, Avg Work HR: ${intervals.summary.avgWorkHR}`)
+    console.log(
+      `  Intervals: ${intervals.totalSets}/${intervals.targetSets} sets, Avg Work HR: ${intervals.summary.avgWorkHR}`,
+    )
   }
 }
 
-async function main() {
+async function main(): Promise<void> {
   const args = process.argv.slice(2)
 
   console.log('='.repeat(50))
@@ -203,10 +235,12 @@ async function main() {
   const settings = await getAllSettings()
   console.log(`Settings: LTHR=${settings.lthr}, RestHR=${settings.rest_hr}`)
 
-  let files = []
+  let files: string[] = []
 
   if (args.length > 0) {
-    files = args.map((arg) => (arg.startsWith('/') ? arg : join(process.cwd(), arg)))
+    files = args.map((arg) =>
+      arg.startsWith('/') ? arg : join(process.cwd(), arg),
+    )
   } else {
     if (!existsSync(DATA_DIR)) {
       console.log('\nNo data/ folder found. Creating...')
@@ -227,7 +261,7 @@ async function main() {
 
   console.log(`\nFound ${files.length} file(s)`)
 
-  const results = []
+  const results: ProcessResult[] = []
   for (const file of files) {
     const result = processFile(file, settings)
     results.push(result)

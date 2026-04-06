@@ -1,18 +1,18 @@
 import 'dotenv/config'
-import GarminConnect from 'garmin-connect'
+import GarminConnect, { type Activity } from 'garmin-connect'
 import { existsSync, mkdirSync, readdirSync, unlinkSync, renameSync } from 'fs'
 import { join } from 'path'
 import { execSync } from 'child_process'
 
 const DATA_DIR = join(process.cwd(), 'data')
 
-function ensureDir(dir) {
+function ensureDir(dir: string): void {
   if (!existsSync(dir)) {
     mkdirSync(dir, { recursive: true })
   }
 }
 
-function getExistingActivityIds() {
+function getExistingActivityIds(): Set<string> {
   if (!existsSync(DATA_DIR)) return new Set()
   return new Set(
     readdirSync(DATA_DIR)
@@ -24,11 +24,15 @@ function getExistingActivityIds() {
           return parts[2]
         }
         return parts[0]
-      })
+      }),
   )
 }
 
-function extractAndCleanup(zipPath, activity) {
+
+function extractAndCleanup(
+  zipPath: string,
+  activity: Activity,
+): string | null {
   const activityId = activity.activityId.toString()
   const startTimeLocal = activity.startTimeLocal || ''
 
@@ -49,7 +53,9 @@ function extractAndCleanup(zipPath, activity) {
   unlinkSync(zipPath)
 
   const afterFiles = readdirSync(DATA_DIR)
-  const newFiles = afterFiles.filter((f) => !beforeFiles.has(f) && f.endsWith('.fit'))
+  const newFiles = afterFiles.filter(
+    (f) => !beforeFiles.has(f) && f.endsWith('.fit'),
+  )
 
   if (newFiles.length > 0) {
     const extractedFit = newFiles[0]
@@ -61,7 +67,7 @@ function extractAndCleanup(zipPath, activity) {
   return null
 }
 
-async function main() {
+async function main(): Promise<void> {
   if (!process.env.GARMIN_EMAIL || !process.env.GARMIN_PASSWORD) {
     console.error('Error: GARMIN_EMAIL and GARMIN_PASSWORD required in .env')
     process.exit(1)
@@ -77,8 +83,7 @@ async function main() {
   const existingIds = getExistingActivityIds()
   console.log(`Found ${existingIds.size} existing activities in data/`)
 
-  const GCClient = GarminConnect.GarminConnect
-  const client = new GCClient()
+  const client = new GarminConnect.GarminConnect()
 
   try {
     console.log('Logging in...')
@@ -86,7 +91,7 @@ async function main() {
     console.log('Login successful!')
 
     console.log(`\nFetching last ${count} activities...`)
-    const activities = await client.getActivities(0, count)
+    const activities: Activity[] = await client.getActivities(0, count)
     console.log(`Found ${activities.length} activities`)
 
     let downloaded = 0
@@ -106,20 +111,26 @@ async function main() {
       console.log(`  Downloading: ${date} - ${name}...`)
 
       try {
-        await client.downloadOriginalActivityData({ activityId: activity.activityId }, DATA_DIR, 'zip')
+        await client.downloadOriginalActivityData(
+          { activityId: activity.activityId },
+          DATA_DIR,
+          'zip',
+        )
         const zipPath = join(DATA_DIR, `${id}.zip`)
         const fitFile = extractAndCleanup(zipPath, activity)
         downloaded++
         console.log(`    -> Saved: ${fitFile}`)
-      } catch (error) {
-        console.error(`    -> Error: ${error.message}`)
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : String(error)
+        console.error(`    -> Error: ${msg}`)
       }
     }
 
     console.log('\n' + '='.repeat(50))
     console.log(`Done! ${downloaded} downloaded, ${skipped} skipped`)
-  } catch (error) {
-    console.error('Error:', error.message)
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error)
+    console.error('Error:', msg)
     process.exit(1)
   }
 }

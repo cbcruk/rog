@@ -1,18 +1,24 @@
-/**
- * Training Stress Score (TSS) Calculator
- *
- * hrTSS = duration_hours * IF^2 * 100
- * IF (Intensity Factor) = (avgHR - restHR) / (LTHR - restHR)
- */
+import type { TSSResult, TSSZone } from '@/types/pmc'
 
-/**
- * Calculate Intensity Factor based on heart rate
- * @param {number} avgHR - Average heart rate during session
- * @param {number} restHR - Resting heart rate
- * @param {number} lthr - Lactate threshold heart rate
- * @returns {number} Intensity Factor (0-1.5+)
- */
-export function calculateIntensityFactor(avgHR, restHR, lthr) {
+interface SessionInput {
+  avgHeartRate?: number
+  durationSeconds?: number
+  summary?: {
+    avgHeartRate: number
+    durationSeconds: number
+  }
+}
+
+interface SettingsInput {
+  lthr?: string | number
+  rest_hr?: string | number
+}
+
+export function calculateIntensityFactor(
+  avgHR: number,
+  restHR: number,
+  lthr: number,
+): number | null {
   if (!avgHR || !restHR || !lthr) return null
   if (lthr <= restHR) return null
 
@@ -22,28 +28,23 @@ export function calculateIntensityFactor(avgHR, restHR, lthr) {
   return Math.max(0, sessionHR / hrReserve)
 }
 
-/**
- * Calculate heart rate based Training Stress Score (hrTSS)
- * @param {number} durationSeconds - Session duration in seconds
- * @param {number} intensityFactor - Intensity Factor
- * @returns {number} hrTSS value
- */
-export function calculateHrTSS(durationSeconds, intensityFactor) {
+export function calculateHrTSS(
+  durationSeconds: number,
+  intensityFactor: number,
+): number | null {
   if (!durationSeconds || intensityFactor === null) return null
 
   const durationHours = durationSeconds / 3600
   return durationHours * Math.pow(intensityFactor, 2) * 100
 }
 
-/**
- * Calculate TSS from session data
- * @param {Object} session - Session data with avgHeartRate and durationSeconds
- * @param {Object} settings - User settings with lthr and rest_hr
- * @returns {Object} TSS calculation result
- */
-export function calculateSessionTSS(session, settings) {
+export function calculateSessionTSS(
+  session: SessionInput,
+  settings: SettingsInput,
+): TSSResult {
   const avgHR = session.avgHeartRate || session.summary?.avgHeartRate
-  const durationSeconds = session.durationSeconds || session.summary?.durationSeconds
+  const durationSeconds =
+    session.durationSeconds || session.summary?.durationSeconds
 
   if (!avgHR || !durationSeconds) {
     return { rtss: null, intensityFactor: null }
@@ -65,12 +66,7 @@ export function calculateSessionTSS(session, settings) {
   }
 }
 
-/**
- * Get TSS zone description
- * @param {number} tss - TSS value
- * @returns {Object} Zone info
- */
-export function getTSSZone(tss) {
+export function getTSSZone(tss: number | null): TSSZone {
   if (tss === null) return { zone: 'unknown', label: 'N/A', recovery: null }
 
   if (tss < 100) {

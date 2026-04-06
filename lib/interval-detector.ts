@@ -1,19 +1,54 @@
-import { parseFitFile } from './parser.mjs'
-import { formatPace, formatTime } from './analyzer.mjs'
+import { parseFitFile } from './parser.ts'
+import { formatPace, formatTime } from './analyzer.ts'
+import type { FitRecord, IntervalResult } from '@/types/running'
 
-function speedToPace(speedMs) {
+interface SmoothedRecord extends FitRecord {
+  smoothedHR: number
+  smoothedSpeed: number
+  smoothedPace: number | null
+}
+
+interface DetectOptions {
+  hrWorkThreshold?: number
+  hrRestThreshold?: number
+  minIntervalDuration?: number
+  minRestDuration?: number
+}
+
+interface WorkoutStructure {
+  sessionType: string
+  hrStats: {
+    mean: number
+    std: number
+    cv: number
+    min: number
+    max: number
+  }
+  paceStats: {
+    mean: string | null
+    std: number
+    cv: number
+  }
+}
+
+function speedToPace(speedMs: number): number | null {
   if (!speedMs || speedMs <= 0) return null
   return 1000 / speedMs / 60
 }
 
-function smoothData(records, windowSize = 10) {
+export function smoothData(
+  records: FitRecord[],
+  windowSize: number = 10,
+): SmoothedRecord[] {
   return records.map((r, i) => {
     const start = Math.max(0, i - windowSize)
     const end = Math.min(records.length, i + windowSize + 1)
     const window = records.slice(start, end)
 
-    const avgHR = window.reduce((sum, w) => sum + (w.heartRate || 0), 0) / window.length
-    const avgSpeed = window.reduce((sum, w) => sum + (w.speed || 0), 0) / window.length
+    const avgHR =
+      window.reduce((sum, w) => sum + (w.heartRate || 0), 0) / window.length
+    const avgSpeed =
+      window.reduce((sum, w) => sum + (w.speed || 0), 0) / window.length
 
     return {
       ...r,
@@ -24,7 +59,10 @@ function smoothData(records, windowSize = 10) {
   })
 }
 
-function detectIntervals(records, options = {}) {
+export function detectIntervals(
+  records: FitRecord[],
+  options: DetectOptions = {},
+): IntervalResult[] {
   const {
     hrWorkThreshold = 150,
     hrRestThreshold = 140,
@@ -33,9 +71,21 @@ function detectIntervals(records, options = {}) {
   } = options
 
   const smoothed = smoothData(records)
-  const intervals = []
-  let currentInterval = null
-  let state = 'unknown'
+  interface RawInterval {
+    type: 'work' | 'rest'
+    startTime: string
+    startDistance: number | undefined
+    startIndex: number
+    endTime?: string
+    endDistance?: number
+    endIndex?: number
+    hrSamples: number[]
+    paceSamples: number[]
+  }
+
+  const intervals: RawInterval[] = []
+  let currentInterval: RawInterval | null = null
+  let state: 'unknown' | 'work' | 'rest' = 'unknown'
 
   for (let i = 0; i < smoothed.length; i++) {
     const r = smoothed[i]
@@ -53,14 +103,14 @@ function detectIntervals(records, options = {}) {
           startTime: r.timestamp,
           startDistance: r.distance,
           startIndex: i,
-          hrSamples: [],
-          paceSamples: [],
+          hrSamples: [] as number[],
+          paceSamples: [] as number[],
         }
         state = 'work'
       }
     }
 
-    if (state === 'work') {
+    if (state === 'work' && currentInterval) {
       currentInterval.hrSamples.push(hr)
       if (r.smoothedPace) currentInterval.paceSamples.push(r.smoothedPace)
 
@@ -82,7 +132,7 @@ function detectIntervals(records, options = {}) {
       }
     }
 
-    if (state === 'rest') {
+    if (state === 'rest' && currentInterval) {
       currentInterval.hrSamples.push(hr)
       if (r.smoothedPace) currentInterval.paceSamples.push(r.smoothedPace)
     }
@@ -98,8 +148,12 @@ function detectIntervals(records, options = {}) {
 
   return intervals
     .map((interval) => {
-      const duration = (new Date(interval.endTime) - new Date(interval.startTime)) / 1000
-      const distance = (interval.endDistance - interval.startDistance) / 1000
+      const duration =
+        (new Date(interval.endTime!).getTime() -
+          new Date(interval.startTime).getTime()) /
+        1000
+      const distance =
+        ((interval.endDistance ?? 0) - (interval.startDistance ?? 0)) / 1000
 
       return {
         type: interval.type,
@@ -107,14 +161,24 @@ function detectIntervals(records, options = {}) {
         durationFormatted: formatTime(duration),
         distance: Number(distance.toFixed(2)),
         avgHR: interval.hrSamples.length
-          ? Math.round(interval.hrSamples.reduce((a, b) => a + b, 0) / interval.hrSamples.length)
+          ? Math.round(
+              interval.hrSamples.reduce((a: number, b: number) => a + b, 0) /
+                interval.hrSamples.length,
+            )
           : null,
-        maxHR: interval.hrSamples.length ? Math.max(...interval.hrSamples) : null,
-        minHR: interval.hrSamples.length ? Math.min(...interval.hrSamples) : null,
+        maxHR: interval.hrSamples.length
+          ? Math.max(...interval.hrSamples)
+          : null,
+        minHR: interval.hrSamples.length
+          ? Math.min(...interval.hrSamples)
+          : null,
         avgPace: interval.paceSamples.length
-          ? formatPace(interval.paceSamples.reduce((a, b) => a + b, 0) / interval.paceSamples.length)
+          ? formatPace(
+              interval.paceSamples.reduce((a: number, b: number) => a + b, 0) /
+                interval.paceSamples.length,
+            )
           : null,
-      }
+      } as IntervalResult
     })
     .filter((i) => {
       if (i.type === 'work') return i.duration >= minIntervalDuration
@@ -122,17 +186,27 @@ function detectIntervals(records, options = {}) {
     })
 }
 
-function analyzeWorkoutStructure(records) {
+export function analyzeWorkoutStructure(
+  records: FitRecord[],
+): WorkoutStructure {
   const smoothed = smoothData(records)
 
   const hrValues = smoothed.map((r) => r.smoothedHR).filter(Boolean)
-  const paceValues = smoothed.map((r) => r.smoothedPace).filter(Boolean)
+  const paceValues = smoothed
+    .map((r) => r.smoothedPace)
+    .filter(Boolean) as number[]
 
   const hrMean = hrValues.reduce((a, b) => a + b, 0) / hrValues.length
-  const hrStd = Math.sqrt(hrValues.reduce((sum, v) => sum + Math.pow(v - hrMean, 2), 0) / hrValues.length)
+  const hrStd = Math.sqrt(
+    hrValues.reduce((sum, v) => sum + Math.pow(v - hrMean, 2), 0) /
+      hrValues.length,
+  )
 
   const paceMean = paceValues.reduce((a, b) => a + b, 0) / paceValues.length
-  const paceStd = Math.sqrt(paceValues.reduce((sum, v) => sum + Math.pow(v - paceMean, 2), 0) / paceValues.length)
+  const paceStd = Math.sqrt(
+    paceValues.reduce((sum, v) => sum + Math.pow(v - paceMean, 2), 0) /
+      paceValues.length,
+  )
 
   const hrCV = (hrStd / hrMean) * 100
   const paceCV = (paceStd / paceMean) * 100
@@ -161,9 +235,7 @@ function analyzeWorkoutStructure(records) {
   }
 }
 
-export { detectIntervals, analyzeWorkoutStructure, smoothData }
-
-if (process.argv[1].includes('interval-detector')) {
+if (process.argv[1]?.includes('interval-detector')) {
   const filePath = process.argv[2] || './data/22010162419_ACTIVITY.fit'
   const data = parseFitFile(filePath)
 
@@ -174,8 +246,12 @@ if (process.argv[1].includes('interval-detector')) {
   const structure = analyzeWorkoutStructure(data.records)
   console.log('\n## Workout Structure')
   console.log(`Type: ${structure.sessionType}`)
-  console.log(`HR: mean=${structure.hrStats.mean}, std=${structure.hrStats.std}, CV=${structure.hrStats.cv}%`)
-  console.log(`Pace: mean=${structure.paceStats.mean}/km, std=${structure.paceStats.std}s, CV=${structure.paceStats.cv}%`)
+  console.log(
+    `HR: mean=${structure.hrStats.mean}, std=${structure.hrStats.std}, CV=${structure.hrStats.cv}%`,
+  )
+  console.log(
+    `Pace: mean=${structure.paceStats.mean}/km, std=${structure.paceStats.std}s, CV=${structure.paceStats.cv}%`,
+  )
 
   const intervals = detectIntervals(data.records, {
     hrWorkThreshold: 148,
@@ -197,7 +273,7 @@ if (process.argv[1].includes('interval-detector')) {
   intervals.forEach((interval, i) => {
     const icon = interval.type === 'work' ? '🔥' : '💧'
     console.log(
-      `${icon} ${i + 1}. ${interval.type.toUpperCase()} | ${interval.durationFormatted} | ${interval.distance}km | HR: ${interval.avgHR} (${interval.minHR}-${interval.maxHR}) | Pace: ${interval.avgPace}/km`
+      `${icon} ${i + 1}. ${interval.type.toUpperCase()} | ${interval.durationFormatted} | ${interval.distance}km | HR: ${interval.avgHR} (${interval.minHR}-${interval.maxHR}) | Pace: ${interval.avgPace}/km`,
     )
   })
 
@@ -205,7 +281,10 @@ if (process.argv[1].includes('interval-detector')) {
     console.log('\n## Work Interval Summary')
     const totalWorkTime = workIntervals.reduce((sum, i) => sum + i.duration, 0)
     const totalWorkDist = workIntervals.reduce((sum, i) => sum + i.distance, 0)
-    const avgWorkHR = Math.round(workIntervals.reduce((sum, i) => sum + i.avgHR, 0) / workIntervals.length)
+    const avgWorkHR = Math.round(
+      workIntervals.reduce((sum, i) => sum + (i.avgHR || 0), 0) /
+        workIntervals.length,
+    )
 
     console.log(`Total work time: ${formatTime(totalWorkTime)}`)
     console.log(`Total work distance: ${totalWorkDist.toFixed(2)}km`)
@@ -213,7 +292,9 @@ if (process.argv[1].includes('interval-detector')) {
 
     console.log('\n## Work Interval Consistency')
     workIntervals.forEach((w, i) => {
-      console.log(`  Set ${i + 1}: ${w.durationFormatted} @ ${w.avgPace}/km (HR ${w.avgHR})`)
+      console.log(
+        `  Set ${i + 1}: ${w.durationFormatted} @ ${w.avgPace}/km (HR ${w.avgHR})`,
+      )
     })
   }
 }

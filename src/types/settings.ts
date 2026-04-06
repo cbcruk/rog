@@ -1,7 +1,11 @@
 export interface UserSettings {
+  /** Lactate Threshold Heart Rate (bpm) */
   lthr: number
+  /** 안정시 심박 (bpm) */
   rest_hr: number
+  /** 최대 심박 (bpm) */
   max_hr: number
+  /** FTP 페이스 (초/km) */
   ftp_pace: number
 }
 

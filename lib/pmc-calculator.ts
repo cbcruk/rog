@@ -1,45 +1,24 @@
-/**
- * Performance Management Chart (PMC) Calculator
- *
- * CTL (Chronic Training Load) - 42-day exponential moving average
- * ATL (Acute Training Load) - 7-day exponential moving average
- * TSB (Training Stress Balance) = CTL - ATL
- */
-
-import { getAllSessionsForPMC, upsertDailyMetrics, getLatestDailyMetrics } from './db.mjs'
+import { getAllSessionsForPMC, upsertDailyMetrics } from './db.ts'
+import type { PMCDataPoint, FitnessStatus, FitnessTrend } from '@/types/pmc'
 
 const CTL_DAYS = 42
 const ATL_DAYS = 7
 
-/**
- * Calculate exponential decay factor
- * @param {number} days - Time constant in days
- * @returns {number} Decay factor (lambda)
- */
-function getDecayFactor(days) {
+function getDecayFactor(days: number): number {
   return 2 / (days + 1)
 }
 
-/**
- * Calculate exponential moving average
- * @param {number} previousEMA - Previous EMA value
- * @param {number} currentValue - Current day's value
- * @param {number} days - Time constant
- * @returns {number} New EMA value
- */
-function calculateEMA(previousEMA, currentValue, days) {
+function calculateEMA(
+  previousEMA: number,
+  currentValue: number,
+  days: number,
+): number {
   const lambda = getDecayFactor(days)
   return previousEMA + lambda * (currentValue - previousEMA)
 }
 
-/**
- * Generate date range array
- * @param {string} startDate - Start date (YYYY-MM-DD)
- * @param {string} endDate - End date (YYYY-MM-DD)
- * @returns {string[]} Array of dates
- */
-function generateDateRange(startDate, endDate) {
-  const dates = []
+function generateDateRange(startDate: string, endDate: string): string[] {
+  const dates: string[] = []
   const current = new Date(startDate)
   const end = new Date(endDate)
 
@@ -51,15 +30,15 @@ function generateDateRange(startDate, endDate) {
   return dates
 }
 
-/**
- * Calculate PMC metrics for all dates
- * @param {Array} sessions - Array of sessions with date and rtss
- * @returns {Array} PMC data for each date
- */
-export function calculatePMC(sessions) {
+interface PMCSession {
+  date: string
+  rtss: number | null
+}
+
+export function calculatePMC(sessions: PMCSession[]): PMCDataPoint[] {
   if (!sessions || sessions.length === 0) return []
 
-  const tssByDate = new Map()
+  const tssByDate = new Map<string, number>()
   for (const session of sessions) {
     const current = tssByDate.get(session.date) || 0
     tssByDate.set(session.date, current + (session.rtss || 0))
@@ -72,7 +51,7 @@ export function calculatePMC(sessions) {
   const today = new Date().toISOString().split('T')[0]
   const allDates = generateDateRange(startDate, today)
 
-  const pmcData = []
+  const pmcData: PMCDataPoint[] = []
   let ctl = 0
   let atl = 0
 
@@ -95,12 +74,9 @@ export function calculatePMC(sessions) {
   return pmcData
 }
 
-/**
- * Calculate and store PMC metrics in database
- */
-export async function calculateAndStorePMC() {
+export async function calculateAndStorePMC(): Promise<PMCDataPoint[]> {
   const sessions = await getAllSessionsForPMC()
-  const pmcData = calculatePMC(sessions)
+  const pmcData = calculatePMC(sessions as unknown as PMCSession[])
 
   for (const day of pmcData) {
     await upsertDailyMetrics(day.date, {
@@ -116,12 +92,7 @@ export async function calculateAndStorePMC() {
   return pmcData
 }
 
-/**
- * Get current fitness status based on TSB
- * @param {number} tsb - Training Stress Balance
- * @returns {Object} Status info
- */
-export function getFitnessStatus(tsb) {
+export function getFitnessStatus(tsb: number | null): FitnessStatus {
   if (tsb === null || tsb === undefined) {
     return { status: 'unknown', label: 'N/A', color: 'gray' }
   }
@@ -139,13 +110,10 @@ export function getFitnessStatus(tsb) {
   }
 }
 
-/**
- * Get CTL (fitness) trend description
- * @param {number} ctl - Current CTL
- * @param {number} previousCtl - Previous CTL (e.g., 7 days ago)
- * @returns {Object} Trend info
- */
-export function getFitnessTrend(ctl, previousCtl) {
+export function getFitnessTrend(
+  ctl: number | null,
+  previousCtl: number | null,
+): FitnessTrend {
   if (ctl === null || previousCtl === null) {
     return { trend: 'unknown', label: 'N/A' }
   }
@@ -162,7 +130,7 @@ export function getFitnessTrend(ctl, previousCtl) {
   }
 }
 
-if (process.argv[1].includes('pmc-calculator.mjs')) {
+if (process.argv[1]?.includes('pmc-calculator')) {
   calculateAndStorePMC()
     .then((data) => {
       if (data.length > 0) {
