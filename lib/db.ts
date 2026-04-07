@@ -17,6 +17,7 @@ function createDbClient() {
 
 const db = createDbClient()
 
+/** sessions, daily_metrics, user_settings 테이블과 기본 설정값을 초기화한다. */
 export async function initDb(): Promise<void> {
   await db.execute(`
     CREATE TABLE IF NOT EXISTS sessions (
@@ -89,6 +90,7 @@ async function initDefaultSettings(): Promise<void> {
   }
 }
 
+/** user_settings 테이블에서 단일 설정값을 조회한다. */
 export async function getSetting(key: string): Promise<string | null> {
   const result = await db.execute({
     sql: `SELECT value FROM user_settings WHERE key = ?`,
@@ -97,6 +99,7 @@ export async function getSetting(key: string): Promise<string | null> {
   return (result.rows[0]?.value as string) ?? null
 }
 
+/** user_settings 테이블에 설정값을 저장하거나 업데이트한다. */
 export async function setSetting(
   key: string,
   value: string | number,
@@ -107,6 +110,7 @@ export async function setSetting(
   })
 }
 
+/** user_settings 테이블의 모든 설정을 key-value 객체로 반환한다. */
 export async function getAllSettings(): Promise<Record<string, string>> {
   const result = await db.execute(`SELECT key, value FROM user_settings`)
   return Object.fromEntries(
@@ -135,6 +139,7 @@ interface AnalysisInput {
   tss?: { rtss: number | null; intensityFactor: number | null }
 }
 
+/** 분석 결과를 sessions 테이블에 삽입하거나 갱신한다. ID는 `{date}_{startTime}`. */
 export async function upsertSession(analysis: AnalysisInput): Promise<void> {
   const id = `${analysis.date}_${analysis.startTime}`
   const { summary, splits, consistency, heartRate, fatigue, elevation, tss } =
@@ -181,6 +186,10 @@ interface SyncOptions {
   calculatePMC?: boolean
 }
 
+/**
+ * results/ 디렉토리의 모든 data.json을 읽어 DB에 동기화한다.
+ * `recalculateTSS` 옵션으로 TSS 재계산, `calculatePMC` 옵션으로 PMC 갱신이 가능하다.
+ */
 export async function syncAllSessions(
   options: SyncOptions = {},
 ): Promise<void> {
@@ -235,6 +244,7 @@ export async function syncAllSessions(
   }
 }
 
+/** 기간 내 총 세션 수, 거리, 시간, 평균 심박, 평균 CV, 누적 오르막을 조회한다. */
 export async function getSeasonStats(fromDate: string, toDate: string) {
   const result = await db.execute({
     sql: `
@@ -253,6 +263,7 @@ export async function getSeasonStats(fromDate: string, toDate: string) {
   return result.rows[0]
 }
 
+/** 최근 N주간 주별 세션 수, 거리, 시간, 평균 심박을 조회한다. */
 export async function getWeeklyVolume(weeks: number = 12) {
   const result = await db.execute({
     sql: `
@@ -272,6 +283,7 @@ export async function getWeeklyVolume(weeks: number = 12) {
   return result.rows
 }
 
+/** 평균 심박 150bpm 초과 세션 중 연일 수행된 고강도 세션 쌍을 조회한다. */
 export async function getConsecutiveHardSessions() {
   const result = await db.execute(`
     SELECT date, avg_hr, consistency_rating,
@@ -291,6 +303,7 @@ export async function getConsecutiveHardSessions() {
   })
 }
 
+/** 지정 거리 ± tolerance(km) 범위의 유사 거리 세션을 최대 10개 조회한다. */
 export async function getSimilarSessions(
   distance: number,
   tolerance: number = 2,
@@ -308,6 +321,7 @@ export async function getSimilarSessions(
   return result.rows
 }
 
+/** 최근 세션을 날짜 역순으로 조회한다. */
 export async function getRecentSessions(limit: number = 10) {
   const result = await db.execute({
     sql: `
@@ -321,6 +335,7 @@ export async function getRecentSessions(limit: number = 10) {
   return result.rows
 }
 
+/** 최근 N개월간 월별 세션 수, 총 거리, 평균 심박, 평균 CV를 조회한다. */
 export async function getMonthlyTrend(months: number = 6) {
   const result = await db.execute({
     sql: `
@@ -340,6 +355,7 @@ export async function getMonthlyTrend(months: number = 6) {
   return result.rows
 }
 
+/** 기간 내 일별 총 TSS와 세션 수를 조회한다. */
 export async function getDailyTSS(fromDate: string, toDate: string) {
   const result = await db.execute({
     sql: `
@@ -362,6 +378,7 @@ interface DailyMetricsInput {
   sessionsCount: number
 }
 
+/** PMC 일별 지표(CTL, ATL, TSB)를 daily_metrics 테이블에 저장한다. */
 export async function upsertDailyMetrics(
   date: string,
   metrics: DailyMetricsInput,
@@ -382,6 +399,7 @@ export async function upsertDailyMetrics(
   })
 }
 
+/** 기간 내 일별 PMC 지표를 조회한다. */
 export async function getDailyMetrics(fromDate: string, toDate: string) {
   const result = await db.execute({
     sql: `
@@ -395,6 +413,7 @@ export async function getDailyMetrics(fromDate: string, toDate: string) {
   return result.rows
 }
 
+/** 가장 최근 날짜의 PMC 지표(CTL, ATL, TSB)를 반환한다. */
 export async function getLatestDailyMetrics() {
   const result = await db.execute(`
     SELECT date, ctl, atl, tsb
@@ -405,6 +424,7 @@ export async function getLatestDailyMetrics() {
   return result.rows[0] || null
 }
 
+/** PMC 계산용으로 전체 세션의 날짜와 TSS를 조회한다. */
 export async function getAllSessionsForPMC() {
   const result = await db.execute(`
     SELECT date, rtss

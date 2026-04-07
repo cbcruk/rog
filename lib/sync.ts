@@ -12,6 +12,7 @@ function ensureDir(dir: string): void {
   }
 }
 
+/** data/ 디렉토리의 FIT 파일명에서 activity ID를 추출하여 중복 다운로드를 방지한다. */
 function getExistingActivityIds(): Set<string> {
   if (!existsSync(DATA_DIR)) return new Set()
   return new Set(
@@ -29,6 +30,7 @@ function getExistingActivityIds(): Set<string> {
 }
 
 
+/** 다운로드된 ZIP을 해제하고 `{date}_{time}_{activityId}.fit`으로 이름을 변경한다. */
 function extractAndCleanup(
   zipPath: string,
   activity: Activity,

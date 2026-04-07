@@ -16,6 +16,7 @@ import type {
   IntervalSet,
 } from '@/types/running'
 
+/** 분/km 숫자를 "M:SS" 문자열로 변환한다. */
 export function formatPace(paceMinPerKm: number): string | null {
   if (!paceMinPerKm || !isFinite(paceMinPerKm)) return null
   const min = Math.floor(paceMinPerKm)
@@ -23,6 +24,7 @@ export function formatPace(paceMinPerKm: number): string | null {
   return `${min}:${String(sec).padStart(2, '0')}`
 }
 
+/** 초를 "H:MM:SS" 또는 "M:SS" 문자열로 변환한다. */
 export function formatTime(seconds: number): string {
   const h = Math.floor(seconds / 3600)
   const m = Math.floor((seconds % 3600) / 60)
@@ -170,6 +172,10 @@ function detectLocation(session: FitSession): string {
   return 'road'
 }
 
+/**
+ * FIT 파싱 결과를 종합 분석하여 RunSession 형태의 분석 결과를 반환한다.
+ * 마지막 랩(잔여 거리)은 분석에서 제외된다.
+ */
 export function analyzeRun({
   session,
   laps,

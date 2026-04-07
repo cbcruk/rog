@@ -25,6 +25,7 @@ function getOutputDir(analysis: { startTime: string }): string {
   return `${year}-${month}-${day}_${hours}${minutes}`
 }
 
+/** 분석 결과를 마크다운 리포트로 변환한다. results/{dir}/spec.md에 저장된다. */
 function generateMarkdown(analysis: Analysis): string {
   const {
     summary,
@@ -163,6 +164,7 @@ interface ProcessResult {
   analysis: Analysis | null
 }
 
+/** FIT 파일 하나를 파싱 → 분석 → JSON/마크다운 저장하는 전체 파이프라인을 실행한다. */
 function processFile(
   filePath: string,
   settings: Record<string, string> = {},

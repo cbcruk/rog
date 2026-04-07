@@ -35,6 +35,10 @@ interface PMCSession {
   rtss: number | null
 }
 
+/**
+ * 세션 목록으로 PMC 지표를 계산한다.
+ * 첫 세션 날짜부터 오늘까지 CTL(42일 EMA), ATL(7일 EMA), TSB(CTL - ATL)를 일별로 산출한다.
+ */
 export function calculatePMC(sessions: PMCSession[]): PMCDataPoint[] {
   if (!sessions || sessions.length === 0) return []
 
@@ -74,6 +78,7 @@ export function calculatePMC(sessions: PMCSession[]): PMCDataPoint[] {
   return pmcData
 }
 
+/** DB에서 전체 세션을 읽어 PMC를 계산하고 daily_metrics 테이블에 저장한다. */
 export async function calculateAndStorePMC(): Promise<PMCDataPoint[]> {
   const sessions = await getAllSessionsForPMC()
   const pmcData = calculatePMC(sessions as unknown as PMCSession[])
@@ -92,6 +97,7 @@ export async function calculateAndStorePMC(): Promise<PMCDataPoint[]> {
   return pmcData
 }
 
+/** TSB 값을 fresh/recovered/neutral/tired/overreaching 상태로 분류한다. */
 export function getFitnessStatus(tsb: number | null): FitnessStatus {
   if (tsb === null || tsb === undefined) {
     return { status: 'unknown', label: 'N/A', color: 'gray' }
@@ -110,6 +116,7 @@ export function getFitnessStatus(tsb: number | null): FitnessStatus {
   }
 }
 
+/** 현재 CTL과 이전 CTL을 비교하여 improving/declining/stable 추세를 판정한다. (±5% 기준) */
 export function getFitnessTrend(
   ctl: number | null,
   previousCtl: number | null,

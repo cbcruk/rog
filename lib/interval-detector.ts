@@ -36,6 +36,7 @@ function speedToPace(speedMs: number): number | null {
   return 1000 / speedMs / 60
 }
 
+/** 심박·속도 데이터에 롤링 윈도우 평균을 적용하여 노이즈를 제거한다. */
 export function smoothData(
   records: FitRecord[],
   windowSize: number = 10,
@@ -59,6 +60,10 @@ export function smoothData(
   })
 }
 
+/**
+ * 심박 임계값 기반으로 운동/회복 인터벌을 자동 감지한다.
+ * 기본값: 운동 시작 150bpm, 회복 전환 140bpm, 최소 운동 60초, 최소 회복 30초.
+ */
 export function detectIntervals(
   records: FitRecord[],
   options: DetectOptions = {},
@@ -186,6 +191,7 @@ export function detectIntervals(
     })
 }
 
+/** 심박·페이스의 변동계수(CV)로 세션을 steady/variable/interval로 분류한다. */
 export function analyzeWorkoutStructure(
   records: FitRecord[],
 ): WorkoutStructure {
