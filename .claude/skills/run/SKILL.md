@@ -140,21 +140,21 @@ data/ 폴더에 분석되지 않은 FIT 파일이 있는지 확인합니다.
 
 ### 데이터 요약
 
-| 항목 | 값 |
-|------|-----|
-| 거리 | [distance]km |
-| 시간 | [duration] |
-| 평균 페이스 | [avgPace]/km |
-| 평균 심박 | [avgHR] bpm ([Zone]) |
-| 최대 심박 | [maxHR] bpm |
-| 고도 | +[ascent]m / -[descent]m |
-| 스플릿 | [type] ([diff]s) |
+| 항목        | 값                       |
+| ----------- | ------------------------ |
+| 거리        | [distance]km             |
+| 시간        | [duration]               |
+| 평균 페이스 | [avgPace]/km             |
+| 평균 심박   | [avgHR] bpm ([Zone])     |
+| 최대 심박   | [maxHR] bpm              |
+| 고도        | +[ascent]m / -[descent]m |
+| 스플릿      | [type] ([diff]s)         |
 
 ### 랩별 분석
 
-| km | Pace | HR | Zone | 고도 | 특이사항 |
-|----|------|-----|------|------|----------|
-| [km] | [pace] | [hr] | [zone] | [elevation] | [notes] |
+| km   | Pace   | HR   | Zone   | 고도        | 특이사항 |
+| ---- | ------ | ---- | ------ | ----------- | -------- |
+| [km] | [pace] | [hr] | [zone] | [elevation] | [notes]  |
 
 ---
 

@@ -75,12 +75,7 @@ export function PMCChart({
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" stroke={COLORS.grid} opacity={0.3} />
-        <XAxis
-          dataKey="dateLabel"
-          tick={{ fontSize: 12 }}
-          tickLine={false}
-          axisLine={false}
-        />
+        <XAxis dataKey="dateLabel" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
         <YAxis
           tick={{ fontSize: 12 }}
           tickLine={false}
@@ -88,12 +83,7 @@ export function PMCChart({
           domain={['auto', 'auto']}
         />
         <Tooltip content={<CustomTooltip />} />
-        {showLegend && (
-          <Legend
-            wrapperStyle={{ paddingTop: 16 }}
-            iconType="line"
-          />
-        )}
+        {showLegend && <Legend wrapperStyle={{ paddingTop: 16 }} iconType="line" />}
         <ReferenceLine y={0} stroke={COLORS.grid} strokeDasharray="3 3" />
         <Area
           type="monotone"

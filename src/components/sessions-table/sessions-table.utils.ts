@@ -89,14 +89,7 @@ export function formatDate(dateStr: string): string {
 }
 
 const TIME_BASED_TYPES = new Set(['이지', '회복', '중강도'])
-const DISTANCE_BASED_TYPES = new Set([
-  '롱런',
-  '템포',
-  '역치',
-  '프로그레션',
-  '트레일',
-  '고강도',
-])
+const DISTANCE_BASED_TYPES = new Set(['롱런', '템포', '역치', '프로그레션', '트레일', '고강도'])
 
 export function isTimeBased(label: string): boolean {
   return TIME_BASED_TYPES.has(label)
@@ -111,9 +104,7 @@ export function getISOWeek(dateStr: string): string {
   const thursday = new Date(date)
   thursday.setDate(date.getDate() + 4 - (date.getDay() || 7))
   const yearStart = new Date(thursday.getFullYear(), 0, 1)
-  const weekNum = Math.ceil(
-    ((thursday.getTime() - yearStart.getTime()) / 86400000 + 1) / 7,
-  )
+  const weekNum = Math.ceil(((thursday.getTime() - yearStart.getTime()) / 86400000 + 1) / 7)
   return `${thursday.getFullYear()}-W${weekNum.toString().padStart(2, '0')}`
 }
 
@@ -151,9 +142,7 @@ export function parseDurationToMinutes(duration: string): number {
   return parts[0] + parts[1] / 60
 }
 
-export function calculateWeeklyStats(
-  sessions: SessionWithFeedback[],
-): Map<string, WeeklyStats> {
+export function calculateWeeklyStats(sessions: SessionWithFeedback[]): Map<string, WeeklyStats> {
   const weeklyMap = new Map<string, WeeklyStats>()
 
   for (const session of sessions) {
@@ -187,11 +176,7 @@ export function getSessionWeeklyPercent(
   const durationMinutes = parseDurationToMinutes(session.summary.duration)
 
   return {
-    distancePercent: Math.round(
-      (session.summary.distance / stats.totalDistance) * 100,
-    ),
-    durationPercent: Math.round(
-      (durationMinutes / stats.totalDurationMinutes) * 100,
-    ),
+    distancePercent: Math.round((session.summary.distance / stats.totalDistance) * 100),
+    durationPercent: Math.round((durationMinutes / stats.totalDurationMinutes) * 100),
   }
 }

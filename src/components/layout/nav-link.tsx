@@ -12,7 +12,12 @@ interface NavLinkProps {
   exact?: boolean
 }
 
-export function NavLink({ href, icon: Icon, label, exact = false }: NavLinkProps): React.ReactElement {
+export function NavLink({
+  href,
+  icon: Icon,
+  label,
+  exact = false,
+}: NavLinkProps): React.ReactElement {
   const pathname = usePathname()
   const isActive = exact ? pathname === href : pathname.startsWith(href)
 
@@ -21,9 +26,7 @@ export function NavLink({ href, icon: Icon, label, exact = false }: NavLinkProps
       href={href}
       className={cn(
         'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
-        isActive
-          ? 'bg-tx/10 text-tx font-medium'
-          : 'text-tx-2 hover:bg-tx/5 hover:text-tx'
+        isActive ? 'bg-tx/10 text-tx font-medium' : 'text-tx-2 hover:bg-tx/5 hover:text-tx',
       )}
     >
       <Icon className="size-5" />
@@ -32,7 +35,12 @@ export function NavLink({ href, icon: Icon, label, exact = false }: NavLinkProps
   )
 }
 
-export function MobileNavLink({ href, icon: Icon, label, exact = false }: NavLinkProps): React.ReactElement {
+export function MobileNavLink({
+  href,
+  icon: Icon,
+  label,
+  exact = false,
+}: NavLinkProps): React.ReactElement {
   const pathname = usePathname()
   const isActive = exact ? pathname === href : pathname.startsWith(href)
 
@@ -41,7 +49,7 @@ export function MobileNavLink({ href, icon: Icon, label, exact = false }: NavLin
       href={href}
       className={cn(
         'flex flex-col items-center gap-1 py-2 text-xs transition-colors',
-        isActive ? 'text-tx' : 'text-tx-3 hover:text-tx-2'
+        isActive ? 'text-tx' : 'text-tx-3 hover:text-tx-2',
       )}
     >
       <Icon className="size-5" />

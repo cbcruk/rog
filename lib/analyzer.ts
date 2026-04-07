@@ -66,28 +66,20 @@ function analyzeIntervals(
     const workEnd = cycleStart + workDuration
 
     const workRecords = records.filter((r) => {
-      const elapsed =
-        (new Date(r.timestamp).getTime() - startTime.getTime()) / 1000
+      const elapsed = (new Date(r.timestamp).getTime() - startTime.getTime()) / 1000
       return elapsed >= cycleStart && elapsed < workEnd
     })
 
     const restRecords = records.filter((r) => {
-      const elapsed =
-        (new Date(r.timestamp).getTime() - startTime.getTime()) / 1000
+      const elapsed = (new Date(r.timestamp).getTime() - startTime.getTime()) / 1000
       return elapsed >= workEnd && elapsed < cycleStart + cycleDuration
     })
 
     if (workRecords.length === 0) continue
 
-    const workHRs = workRecords
-      .map((r) => r.heartRate)
-      .filter(Boolean) as number[]
-    const workSpeeds = workRecords
-      .map((r) => r.speed)
-      .filter(Boolean) as number[]
-    const restHRs = restRecords
-      .map((r) => r.heartRate)
-      .filter(Boolean) as number[]
+    const workHRs = workRecords.map((r) => r.heartRate).filter(Boolean) as number[]
+    const workSpeeds = workRecords.map((r) => r.speed).filter(Boolean) as number[]
+    const restHRs = restRecords.map((r) => r.heartRate).filter(Boolean) as number[]
 
     const avgWorkHR = workHRs.length
       ? Math.round(workHRs.reduce((a, b) => a + b, 0) / workHRs.length)
@@ -103,16 +95,13 @@ function analyzeIntervals(
 
     const workDistance =
       workRecords.length > 1
-        ? ((workRecords[workRecords.length - 1].distance ?? 0) -
-            (workRecords[0].distance ?? 0)) /
+        ? ((workRecords[workRecords.length - 1].distance ?? 0) - (workRecords[0].distance ?? 0)) /
           1000
         : 0
 
     let hrInZone: number | null = null
     if (targetHR?.work && workHRs.length) {
-      const inZone = workHRs.filter(
-        (hr) => hr >= targetHR.work[0] && hr <= targetHR.work[1],
-      ).length
+      const inZone = workHRs.filter((hr) => hr >= targetHR.work[0] && hr <= targetHR.work[1]).length
       hrInZone = Math.round((inZone / workHRs.length) * 100)
     }
 
@@ -176,13 +165,7 @@ function detectLocation(session: FitSession): string {
  * FIT 파싱 결과를 종합 분석하여 RunSession 형태의 분석 결과를 반환한다.
  * 마지막 랩(잔여 거리)은 분석에서 제외된다.
  */
-export function analyzeRun({
-  session,
-  laps,
-  records,
-  metadata,
-  settings = {},
-}: AnalyzeRunInput) {
+export function analyzeRun({ session, laps, records, metadata, settings = {} }: AnalyzeRunInput) {
   if (!session || !laps.length) {
     throw new Error('Invalid data: session or laps missing')
   }
@@ -193,9 +176,7 @@ export function analyzeRun({
   const lapPaces: Lap[] = laps.slice(0, -1).map((lap, i) => ({
     km: i + 1,
     pace: lap.totalElapsedTime / 60 / (lap.totalDistance / 1000),
-    paceFormatted: formatPace(
-      lap.totalElapsedTime / 60 / (lap.totalDistance / 1000),
-    )!,
+    paceFormatted: formatPace(lap.totalElapsedTime / 60 / (lap.totalDistance / 1000))!,
     heartRate: lap.avgHeartRate,
     cadence: lap.avgRunningCadence ? lap.avgRunningCadence * 2 : null,
     ascent: lap.totalAscent || 0,
@@ -209,20 +190,14 @@ export function analyzeRun({
   const secondHalfPace = calcAvgPace(secondHalfLaps)
   const paceDiff = secondHalfPace - firstHalfPace
 
-  const avgPaceNum =
-    lapPaces.reduce((sum, l) => sum + l.pace, 0) / lapPaces.length
+  const avgPaceNum = lapPaces.reduce((sum, l) => sum + l.pace, 0) / lapPaces.length
   const variance =
-    lapPaces.reduce((sum, l) => sum + Math.pow(l.pace - avgPaceNum, 2), 0) /
-    lapPaces.length
+    lapPaces.reduce((sum, l) => sum + Math.pow(l.pace - avgPaceNum, 2), 0) / lapPaces.length
   const stdDev = Math.sqrt(variance)
   const cv = (stdDev / avgPaceNum) * 100
 
-  const fastest = lapPaces.reduce((min, lap) =>
-    lap.pace < min.pace ? lap : min,
-  )
-  const slowest = lapPaces.reduce((max, lap) =>
-    lap.pace > max.pace ? lap : max,
-  )
+  const fastest = lapPaces.reduce((min, lap) => (lap.pace < min.pace ? lap : min))
+  const slowest = lapPaces.reduce((max, lap) => (lap.pace > max.pace ? lap : max))
 
   const segments: Segment[] = []
   const segmentSize = 5
@@ -237,10 +212,7 @@ export function analyzeRun({
       range: `${start + 1}-${end}km`,
       pace: formatPace(calcAvgPace(segmentLaps))!,
       avgHeartRate: validHRLaps.length
-        ? Math.round(
-            validHRLaps.reduce((sum, l) => sum + l.avgHeartRate, 0) /
-              validHRLaps.length,
-          )
+        ? Math.round(validHRLaps.reduce((sum, l) => sum + l.avgHeartRate, 0) / validHRLaps.length)
         : null,
     })
   }
@@ -250,16 +222,13 @@ export function analyzeRun({
   if (validHRLaps.length > 0) {
     const early = validHRLaps.slice(0, 5)
     const late = validHRLaps.slice(-5)
-    const earlyAvgHR =
-      early.reduce((sum, l) => sum + l.heartRate, 0) / early.length
-    const lateAvgHR =
-      late.reduce((sum, l) => sum + l.heartRate, 0) / late.length
+    const earlyAvgHR = early.reduce((sum, l) => sum + l.heartRate, 0) / early.length
+    const lateAvgHR = late.reduce((sum, l) => sum + l.heartRate, 0) / late.length
     const hrDrift = ((lateAvgHR - earlyAvgHR) / earlyAvgHR) * 100
 
     heartRateAnalysis = {
       avgHeartRate: Math.round(
-        validHRLaps.reduce((sum, l) => sum + l.heartRate, 0) /
-          validHRLaps.length,
+        validHRLaps.reduce((sum, l) => sum + l.heartRate, 0) / validHRLaps.length,
       ),
       minHeartRate: Math.min(...validHRLaps.map((l) => l.heartRate)),
       maxHeartRate: Math.max(...validHRLaps.map((l) => l.heartRate)),
@@ -331,9 +300,7 @@ export function analyzeRun({
       avgHeartRate: session.avgHeartRate,
       maxHeartRate: session.maxHeartRate,
       calories: session.totalCalories,
-      avgCadence: session.avgRunningCadence
-        ? session.avgRunningCadence * 2
-        : null,
+      avgCadence: session.avgRunningCadence ? session.avgRunningCadence * 2 : null,
     },
     splits,
     segments,

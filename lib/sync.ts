@@ -1,3 +1,4 @@
+// @ts-expect-error -- dotenv has no type declarations
 import 'dotenv/config'
 import GarminConnect, { type Activity } from 'garmin-connect'
 import { existsSync, mkdirSync, readdirSync, unlinkSync, renameSync } from 'fs'
@@ -29,12 +30,8 @@ function getExistingActivityIds(): Set<string> {
   )
 }
 
-
 /** 다운로드된 ZIP을 해제하고 `{date}_{time}_{activityId}.fit`으로 이름을 변경한다. */
-function extractAndCleanup(
-  zipPath: string,
-  activity: Activity,
-): string | null {
+function extractAndCleanup(zipPath: string, activity: Activity): string | null {
   const activityId = activity.activityId.toString()
   const startTimeLocal = activity.startTimeLocal || ''
 
@@ -55,9 +52,7 @@ function extractAndCleanup(
   unlinkSync(zipPath)
 
   const afterFiles = readdirSync(DATA_DIR)
-  const newFiles = afterFiles.filter(
-    (f) => !beforeFiles.has(f) && f.endsWith('.fit'),
-  )
+  const newFiles = afterFiles.filter((f) => !beforeFiles.has(f) && f.endsWith('.fit'))
 
   if (newFiles.length > 0) {
     const extractedFit = newFiles[0]
@@ -137,4 +132,4 @@ async function main(): Promise<void> {
   }
 }
 
-main()
+void main()

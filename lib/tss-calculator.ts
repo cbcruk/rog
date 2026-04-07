@@ -35,10 +35,7 @@ export function calculateIntensityFactor(
 }
 
 /** IF와 운동 시간으로 hrTSS를 계산한다. */
-export function calculateHrTSS(
-  durationSeconds: number,
-  intensityFactor: number,
-): number | null {
+export function calculateHrTSS(durationSeconds: number, intensityFactor: number): number | null {
   if (!durationSeconds || intensityFactor === null) return null
 
   const durationHours = durationSeconds / 3600
@@ -46,13 +43,9 @@ export function calculateHrTSS(
 }
 
 /** 세션 데이터와 사용자 설정으로 TSS를 계산한다. avgHR과 durationSeconds가 필수. */
-export function calculateSessionTSS(
-  session: SessionInput,
-  settings: SettingsInput,
-): TSSResult {
+export function calculateSessionTSS(session: SessionInput, settings: SettingsInput): TSSResult {
   const avgHR = session.avgHeartRate || session.summary?.avgHeartRate
-  const durationSeconds =
-    session.durationSeconds || session.summary?.durationSeconds
+  const durationSeconds = session.durationSeconds || session.summary?.durationSeconds
 
   if (!avgHR || !durationSeconds) {
     return { rtss: null, intensityFactor: null }

@@ -29,10 +29,7 @@ export function loadMetadata(fitFilePath: string): Partial<Metadata> | null {
   const parts = fitName.split('_')
   const activityId = parts.length >= 3 ? parts[2] : parts[0]
 
-  const candidates = [
-    join(dir, `${fitName}.meta.json`),
-    join(dir, `${activityId}.meta.json`),
-  ]
+  const candidates = [join(dir, `${fitName}.meta.json`), join(dir, `${activityId}.meta.json`)]
 
   for (const metaPath of candidates) {
     if (existsSync(metaPath)) {

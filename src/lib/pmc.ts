@@ -1,10 +1,5 @@
 import { createClient } from '@libsql/client'
-import type {
-  PMCDataPoint,
-  PMCSummary,
-  DailyMetrics,
-  FitnessStatus,
-} from '@/types/pmc'
+import type { PMCDataPoint, PMCSummary, DailyMetrics, FitnessStatus } from '@/types/pmc'
 
 function createDbClient(): ReturnType<typeof createClient> {
   const dbUrl = process.env.TURSO_DATABASE_URL
@@ -120,10 +115,7 @@ export async function getPMCSummary(): Promise<PMCSummary | null> {
       WHERE date IN (?, ?)
       ORDER BY date ASC
     `,
-    args: [
-      monthAgo.toISOString().split('T')[0],
-      weekAgo.toISOString().split('T')[0],
-    ],
+    args: [monthAgo.toISOString().split('T')[0], weekAgo.toISOString().split('T')[0]],
   })
 
   const weeklyTSS = (weeklyTSSResult.rows[0]?.weekly_tss as number) ?? 0

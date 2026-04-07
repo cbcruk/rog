@@ -1,10 +1,6 @@
 'use client'
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { TableHead } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
 
@@ -30,12 +26,7 @@ export function TableHeadTooltip({
   return (
     <TableHead className={cn(className)}>
       <Tooltip>
-        <TooltipTrigger
-          className={cn(
-            'flex items-center gap-1',
-            isRightAligned && 'ml-auto'
-          )}
-        >
+        <TooltipTrigger className={cn('flex items-center gap-1', isRightAligned && 'ml-auto')}>
           {icon}
           {label}
         </TooltipTrigger>

@@ -118,7 +118,9 @@ export default async function SessionPage({
                   <th className="p-2 text-right text-(--tx-2)">Pace</th>
                   <th className="p-2 text-right text-(--tx-2)">HR</th>
                   <th className="p-2 text-right text-(--tx-2)">Zone</th>
-                  {session.laps[0].cadence && <th className="p-2 text-right text-(--tx-2)">Cadence</th>}
+                  {session.laps[0].cadence && (
+                    <th className="p-2 text-right text-(--tx-2)">Cadence</th>
+                  )}
                   {showElevation && <th className="p-2 text-right text-(--tx-2)">Elev</th>}
                 </tr>
               </thead>
@@ -159,7 +161,11 @@ export default async function SessionPage({
             <tr className="border-b border-(--ui)">
               <td className="p-2 text-(--tx-2)">Split Type</td>
               <td className="p-2 text-right">
-                <span className={session.splits.type === 'negative' ? 'text-(--green)' : 'text-(--orange)'}>
+                <span
+                  className={
+                    session.splits.type === 'negative' ? 'text-(--green)' : 'text-(--orange)'
+                  }
+                >
                   {session.splits.type} ({session.splits.type === 'negative' ? '' : '+'}
                   {session.splits.diffSeconds}s)
                 </span>
@@ -201,7 +207,9 @@ export default async function SessionPage({
             <tbody>
               <tr className="border-b border-(--ui)">
                 <td className="p-2 text-(--tx-2)">Avg</td>
-                <td className="p-2 text-right text-(--red)">{session.heartRate.avgHeartRate} bpm</td>
+                <td className="p-2 text-right text-(--red)">
+                  {session.heartRate.avgHeartRate} bpm
+                </td>
               </tr>
               <tr className="border-b border-(--ui)">
                 <td className="p-2 text-(--tx-2)">Min</td>

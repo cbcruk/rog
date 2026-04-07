@@ -37,19 +37,14 @@ function speedToPace(speedMs: number): number | null {
 }
 
 /** 심박·속도 데이터에 롤링 윈도우 평균을 적용하여 노이즈를 제거한다. */
-export function smoothData(
-  records: FitRecord[],
-  windowSize: number = 10,
-): SmoothedRecord[] {
+export function smoothData(records: FitRecord[], windowSize: number = 10): SmoothedRecord[] {
   return records.map((r, i) => {
     const start = Math.max(0, i - windowSize)
     const end = Math.min(records.length, i + windowSize + 1)
     const window = records.slice(start, end)
 
-    const avgHR =
-      window.reduce((sum, w) => sum + (w.heartRate || 0), 0) / window.length
-    const avgSpeed =
-      window.reduce((sum, w) => sum + (w.speed || 0), 0) / window.length
+    const avgHR = window.reduce((sum, w) => sum + (w.heartRate || 0), 0) / window.length
+    const avgSpeed = window.reduce((sum, w) => sum + (w.speed || 0), 0) / window.length
 
     return {
       ...r,
@@ -154,11 +149,8 @@ export function detectIntervals(
   return intervals
     .map((interval) => {
       const duration =
-        (new Date(interval.endTime!).getTime() -
-          new Date(interval.startTime).getTime()) /
-        1000
-      const distance =
-        ((interval.endDistance ?? 0) - (interval.startDistance ?? 0)) / 1000
+        (new Date(interval.endTime!).getTime() - new Date(interval.startTime).getTime()) / 1000
+      const distance = ((interval.endDistance ?? 0) - (interval.startDistance ?? 0)) / 1000
 
       return {
         type: interval.type,
@@ -171,12 +163,8 @@ export function detectIntervals(
                 interval.hrSamples.length,
             )
           : null,
-        maxHR: interval.hrSamples.length
-          ? Math.max(...interval.hrSamples)
-          : null,
-        minHR: interval.hrSamples.length
-          ? Math.min(...interval.hrSamples)
-          : null,
+        maxHR: interval.hrSamples.length ? Math.max(...interval.hrSamples) : null,
+        minHR: interval.hrSamples.length ? Math.min(...interval.hrSamples) : null,
         avgPace: interval.paceSamples.length
           ? formatPace(
               interval.paceSamples.reduce((a: number, b: number) => a + b, 0) /
@@ -192,26 +180,20 @@ export function detectIntervals(
 }
 
 /** 심박·페이스의 변동계수(CV)로 세션을 steady/variable/interval로 분류한다. */
-export function analyzeWorkoutStructure(
-  records: FitRecord[],
-): WorkoutStructure {
+export function analyzeWorkoutStructure(records: FitRecord[]): WorkoutStructure {
   const smoothed = smoothData(records)
 
   const hrValues = smoothed.map((r) => r.smoothedHR).filter(Boolean)
-  const paceValues = smoothed
-    .map((r) => r.smoothedPace)
-    .filter(Boolean) as number[]
+  const paceValues = smoothed.map((r) => r.smoothedPace).filter(Boolean) as number[]
 
   const hrMean = hrValues.reduce((a, b) => a + b, 0) / hrValues.length
   const hrStd = Math.sqrt(
-    hrValues.reduce((sum, v) => sum + Math.pow(v - hrMean, 2), 0) /
-      hrValues.length,
+    hrValues.reduce((sum, v) => sum + Math.pow(v - hrMean, 2), 0) / hrValues.length,
   )
 
   const paceMean = paceValues.reduce((a, b) => a + b, 0) / paceValues.length
   const paceStd = Math.sqrt(
-    paceValues.reduce((sum, v) => sum + Math.pow(v - paceMean, 2), 0) /
-      paceValues.length,
+    paceValues.reduce((sum, v) => sum + Math.pow(v - paceMean, 2), 0) / paceValues.length,
   )
 
   const hrCV = (hrStd / hrMean) * 100
@@ -288,8 +270,7 @@ if (process.argv[1]?.includes('interval-detector')) {
     const totalWorkTime = workIntervals.reduce((sum, i) => sum + i.duration, 0)
     const totalWorkDist = workIntervals.reduce((sum, i) => sum + i.distance, 0)
     const avgWorkHR = Math.round(
-      workIntervals.reduce((sum, i) => sum + (i.avgHR || 0), 0) /
-        workIntervals.length,
+      workIntervals.reduce((sum, i) => sum + (i.avgHR || 0), 0) / workIntervals.length,
     )
 
     console.log(`Total work time: ${formatTime(totalWorkTime)}`)
@@ -298,9 +279,7 @@ if (process.argv[1]?.includes('interval-detector')) {
 
     console.log('\n## Work Interval Consistency')
     workIntervals.forEach((w, i) => {
-      console.log(
-        `  Set ${i + 1}: ${w.durationFormatted} @ ${w.avgPace}/km (HR ${w.avgHR})`,
-      )
+      console.log(`  Set ${i + 1}: ${w.durationFormatted} @ ${w.avgPace}/km (HR ${w.avgHR})`)
     })
   }
 }

@@ -32,9 +32,7 @@ export async function getSettings(): Promise<UserSettings> {
   return settings
 }
 
-export async function updateSettings(
-  settings: Partial<UserSettings>,
-): Promise<void> {
+export async function updateSettings(settings: Partial<UserSettings>): Promise<void> {
   const db = createDbClient()
 
   for (const [key, value] of Object.entries(settings)) {

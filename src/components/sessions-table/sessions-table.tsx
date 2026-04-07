@@ -13,12 +13,7 @@ import {
   Tooltip as RechartsTooltip,
 } from 'recharts'
 import { Gauge, Heart, TrendingDown, TrendingUp } from 'lucide-react'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import type { SessionsTableProps } from './sessions-table.types'
 import type { SessionWithFeedback } from '@/types/running'
 import {
@@ -129,17 +124,11 @@ function buildWeekFlowData(group: WeekGroup): FlowDataPoint[] {
       }
     }
 
-    const totalDistance = day.sessions.reduce(
-      (sum, s) => sum + s.summary.distance,
-      0
-    )
+    const totalDistance = day.sessions.reduce((sum, s) => sum + s.summary.distance, 0)
     const avgHR = Math.round(
-      day.sessions.reduce((sum, s) => sum + s.summary.avgHeartRate, 0) /
-        day.sessions.length
+      day.sessions.reduce((sum, s) => sum + s.summary.avgHeartRate, 0) / day.sessions.length,
     )
-    const primary = day.sessions.reduce((a, b) =>
-      b.summary.distance > a.summary.distance ? b : a
-    )
+    const primary = day.sessions.reduce((a, b) => (b.summary.distance > a.summary.distance ? b : a))
     const typeLabel = getSessionTypeLabel(primary)
 
     return {
@@ -178,27 +167,15 @@ function FlowChartTooltip({
   )
 }
 
-function WeeklyFlowChart({
-  group,
-}: {
-  group: WeekGroup
-}): React.ReactElement {
+function WeeklyFlowChart({ group }: { group: WeekGroup }): React.ReactElement {
   const data = useMemo(() => buildWeekFlowData(group), [group])
   const maxDistance = Math.max(...data.map((d) => d.distance))
 
   return (
     <div className="mt-3 rounded-lg border border-ui bg-bg-2 p-3">
       <ResponsiveContainer width="100%" height={120}>
-        <ComposedChart
-          data={data}
-          margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
-        >
-          <XAxis
-            dataKey="day"
-            tick={{ fontSize: 11 }}
-            tickLine={false}
-            axisLine={false}
-          />
+        <ComposedChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+          <XAxis dataKey="day" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
           <YAxis
             yAxisId="distance"
             domain={[0, Math.ceil(maxDistance * 1.2)]}
@@ -207,19 +184,9 @@ function WeeklyFlowChart({
             axisLine={false}
             width={40}
           />
-          <YAxis
-            yAxisId="hr"
-            orientation="right"
-            domain={['dataMin - 10', 'dataMax + 10']}
-            hide
-          />
+          <YAxis yAxisId="hr" orientation="right" domain={['dataMin - 10', 'dataMax + 10']} hide />
           <RechartsTooltip content={<FlowChartTooltip />} />
-          <Bar
-            yAxisId="distance"
-            dataKey="distance"
-            radius={[4, 4, 0, 0]}
-            maxBarSize={32}
-          >
+          <Bar yAxisId="distance" dataKey="distance" radius={[4, 4, 0, 0]} maxBarSize={32}>
             {data.map((entry, i) => (
               <Cell key={i} fill={entry.color} fillOpacity={0.8} />
             ))}
@@ -246,10 +213,7 @@ function WeeklyCalendar({ group }: { group: WeekGroup }): React.ReactElement {
     <TooltipProvider>
       <div className="grid grid-cols-7 overflow-hidden rounded-lg border border-ui bg-bg-2">
         {days.map((day, i) => (
-          <div
-            key={i}
-            className={`min-h-16 ${i < 6 ? 'border-r border-ui' : ''}`}
-          >
+          <div key={i} className={`min-h-16 ${i < 6 ? 'border-r border-ui' : ''}`}>
             <div className="border-b border-ui px-1.5 py-1 text-center">
               <div className="text-[10px] text-tx-2">{day.dayLabel}</div>
               <div className="text-xs text-tx-3">{day.dateNum}</div>
@@ -263,9 +227,7 @@ function WeeklyCalendar({ group }: { group: WeekGroup }): React.ReactElement {
                   <Tooltip key={session.id}>
                     <TooltipTrigger
                       className="flex w-full items-center gap-1 text-xs tabular-nums leading-tight"
-                      render={
-                        <Link href={`/session/${session.id}`} />
-                      }
+                      render={<Link href={`/session/${session.id}`} />}
                     >
                       <span
                         className="inline-flex rounded-full w-2 aspect-square"
@@ -287,9 +249,7 @@ function WeeklyCalendar({ group }: { group: WeekGroup }): React.ReactElement {
                               </span>
                             )}
                           </span>
-                          <span className="text-background/60">
-                            {session.summary.duration}
-                          </span>
+                          <span className="text-background/60">{session.summary.duration}</span>
                         </div>
                         <div className="flex items-center gap-3 text-background/80">
                           <span className="flex items-center gap-1">
@@ -322,9 +282,7 @@ function WeeklyCalendar({ group }: { group: WeekGroup }): React.ReactElement {
   )
 }
 
-export function SessionsTable({
-  sessions,
-}: SessionsTableProps): React.ReactElement {
+export function SessionsTable({ sessions }: SessionsTableProps): React.ReactElement {
   const weekGroups = useMemo(() => groupSessionsByWeek(sessions), [sessions])
 
   return (
@@ -334,8 +292,7 @@ export function SessionsTable({
           <div className="sticky top-0 z-10 flex items-center justify-between bg-bg px-1 py-2">
             <span className="font-semibold">{group.weekRange}</span>
             <span className="text-sm text-tx-2">
-              {group.totalDistance.toFixed(1)}km ·{' '}
-              {formatDuration(group.totalDurationMinutes)}
+              {group.totalDistance.toFixed(1)}km · {formatDuration(group.totalDurationMinutes)}
             </span>
           </div>
 

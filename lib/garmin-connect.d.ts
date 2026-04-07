@@ -12,11 +12,7 @@ declare module 'garmin-connect' {
   export class GarminConnect {
     login(email: string, password: string): Promise<void>
     getActivities(start: number, limit: number): Promise<Activity[]>
-    downloadOriginalActivityData(
-      activity: ActivityRef,
-      dir: string,
-      format: string,
-    ): Promise<void>
+    downloadOriginalActivityData(activity: ActivityRef, dir: string, format: string): Promise<void>
   }
 
   const _default: { GarminConnect: typeof GarminConnect }

@@ -29,7 +29,8 @@ export default async function SettingsPage(): Promise<React.ReactElement> {
             <strong>Intensity Factor (IF)</strong> = (Avg HR - Rest HR) / (LTHR - Rest HR)
           </p>
           <p className="text-xs">
-            TSS helps measure training load. A value of 100 represents a 1-hour workout at threshold intensity.
+            TSS helps measure training load. A value of 100 represents a 1-hour workout at threshold
+            intensity.
           </p>
         </div>
       </div>

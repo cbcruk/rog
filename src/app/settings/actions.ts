@@ -10,7 +10,7 @@ export interface SaveSettingsState {
 
 export async function saveSettings(
   _prevState: SaveSettingsState | null,
-  formData: FormData
+  formData: FormData,
 ): Promise<SaveSettingsState> {
   try {
     const lthr = Number(formData.get('lthr'))

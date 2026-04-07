@@ -27,9 +27,7 @@ export function SettingsForm({ settings }: SettingsFormProps): React.ReactElemen
             />
             <span className="text-sm text-tx-2">bpm</span>
           </div>
-          <p className="text-xs text-tx-3">
-            1 hour max sustainable pace HR
-          </p>
+          <p className="text-xs text-tx-3">1 hour max sustainable pace HR</p>
         </div>
 
         <div className="space-y-2">
@@ -48,9 +46,7 @@ export function SettingsForm({ settings }: SettingsFormProps): React.ReactElemen
             />
             <span className="text-sm text-tx-2">bpm</span>
           </div>
-          <p className="text-xs text-tx-3">
-            Morning resting heart rate
-          </p>
+          <p className="text-xs text-tx-3">Morning resting heart rate</p>
         </div>
 
         <div className="space-y-2">
@@ -69,9 +65,7 @@ export function SettingsForm({ settings }: SettingsFormProps): React.ReactElemen
             />
             <span className="text-sm text-tx-2">bpm</span>
           </div>
-          <p className="text-xs text-tx-3">
-            Maximum heart rate
-          </p>
+          <p className="text-xs text-tx-3">Maximum heart rate</p>
         </div>
 
         <div className="space-y-2">
@@ -90,25 +84,15 @@ export function SettingsForm({ settings }: SettingsFormProps): React.ReactElemen
             />
             <span className="text-sm text-tx-2">sec/km</span>
           </div>
-          <p className="text-xs text-tx-3">
-            1 hour sustainable pace (e.g., 270 = 4:30/km)
-          </p>
+          <p className="text-xs text-tx-3">1 hour sustainable pace (e.g., 270 = 4:30/km)</p>
         </div>
       </div>
 
-      {state?.error && (
-        <p className="text-sm text-red-500">{state.error}</p>
-      )}
+      {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
 
-      {state?.success && (
-        <p className="text-sm text-green-600">Settings saved successfully!</p>
-      )}
+      {state?.success && <p className="text-sm text-green-600">Settings saved successfully!</p>}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className={buttonVariants({ variant: 'default' })}
-      >
+      <button type="submit" disabled={isPending} className={buttonVariants({ variant: 'default' })}>
         {isPending ? 'Saving...' : 'Save Settings'}
       </button>
     </form>

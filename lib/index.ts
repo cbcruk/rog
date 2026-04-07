@@ -165,10 +165,7 @@ interface ProcessResult {
 }
 
 /** FIT 파일 하나를 파싱 → 분석 → JSON/마크다운 저장하는 전체 파이프라인을 실행한다. */
-function processFile(
-  filePath: string,
-  settings: Record<string, string> = {},
-): ProcessResult {
+function processFile(filePath: string, settings: Record<string, string> = {}): ProcessResult {
   const filename = basename(filePath)
   console.log(`\nProcessing: ${filename}`)
 
@@ -185,10 +182,7 @@ function processFile(
     const outputDir = join(RESULTS_DIR, getOutputDir(analysis))
     ensureDir(outputDir)
 
-    writeFileSync(
-      join(outputDir, 'data.json'),
-      JSON.stringify(analysis, null, 2),
-    )
+    writeFileSync(join(outputDir, 'data.json'), JSON.stringify(analysis, null, 2))
     writeFileSync(join(outputDir, 'spec.md'), generateMarkdown(analysis))
 
     const dirName = getOutputDir(analysis)
@@ -240,9 +234,7 @@ async function main(): Promise<void> {
   let files: string[] = []
 
   if (args.length > 0) {
-    files = args.map((arg) =>
-      arg.startsWith('/') ? arg : join(process.cwd(), arg),
-    )
+    files = args.map((arg) => (arg.startsWith('/') ? arg : join(process.cwd(), arg)))
   } else {
     if (!existsSync(DATA_DIR)) {
       console.log('\nNo data/ folder found. Creating...')
@@ -285,4 +277,4 @@ async function main(): Promise<void> {
   }
 }
 
-main()
+void main()

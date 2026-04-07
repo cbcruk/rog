@@ -8,11 +8,7 @@ function getDecayFactor(days: number): number {
   return 2 / (days + 1)
 }
 
-function calculateEMA(
-  previousEMA: number,
-  currentValue: number,
-  days: number,
-): number {
+function calculateEMA(previousEMA: number, currentValue: number, days: number): number {
   const lambda = getDecayFactor(days)
   return previousEMA + lambda * (currentValue - previousEMA)
 }
@@ -117,10 +113,7 @@ export function getFitnessStatus(tsb: number | null): FitnessStatus {
 }
 
 /** 현재 CTL과 이전 CTL을 비교하여 improving/declining/stable 추세를 판정한다. (±5% 기준) */
-export function getFitnessTrend(
-  ctl: number | null,
-  previousCtl: number | null,
-): FitnessTrend {
+export function getFitnessTrend(ctl: number | null, previousCtl: number | null): FitnessTrend {
   if (ctl === null || previousCtl === null) {
     return { trend: 'unknown', label: 'N/A' }
   }

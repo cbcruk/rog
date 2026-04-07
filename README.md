@@ -23,12 +23,14 @@ Garmin FIT 파일 분석기 - Bakken Norwegian Model 훈련 추적
 ```
 
 **워크플로우:**
+
 1. `data/` 폴더의 FIT 파일 확인
 2. `pnpm analyze`로 JSON 생성
 3. 세션 유형 분류 (Easy, Threshold, Long Run 등)
 4. 코칭 피드백 생성 및 `results/{date}/feedback.md`에 저장
 
 **분석 항목:**
+
 - Z2 체류 시간 (역치 세션 핵심)
 - Z3 침범 여부
 - 페이스 일관성 (CV)
@@ -38,6 +40,7 @@ Garmin FIT 파일 분석기 - Bakken Norwegian Model 훈련 추적
 ### 훈련 컨텍스트
 
 `training-context.md`에 정의된 러너 프로필:
+
 - 심박 존 설정 (LT1 ≈ 150, LT2 ≈ 163)
 - Bakken 핵심 원칙
 - 세션 종료 기준

@@ -100,10 +100,7 @@ export async function getSetting(key: string): Promise<string | null> {
 }
 
 /** user_settings 테이블에 설정값을 저장하거나 업데이트한다. */
-export async function setSetting(
-  key: string,
-  value: string | number,
-): Promise<void> {
+export async function setSetting(key: string, value: string | number): Promise<void> {
   await db.execute({
     sql: `INSERT OR REPLACE INTO user_settings (key, value) VALUES (?, ?)`,
     args: [key, String(value)],
@@ -113,9 +110,7 @@ export async function setSetting(
 /** user_settings 테이블의 모든 설정을 key-value 객체로 반환한다. */
 export async function getAllSettings(): Promise<Record<string, string>> {
   const result = await db.execute(`SELECT key, value FROM user_settings`)
-  return Object.fromEntries(
-    result.rows.map((row) => [row.key, row.value as string]),
-  )
+  return Object.fromEntries(result.rows.map((row) => [row.key, row.value as string]))
 }
 
 interface AnalysisInput {
@@ -142,8 +137,7 @@ interface AnalysisInput {
 /** 분석 결과를 sessions 테이블에 삽입하거나 갱신한다. ID는 `{date}_{startTime}`. */
 export async function upsertSession(analysis: AnalysisInput): Promise<void> {
   const id = `${analysis.date}_${analysis.startTime}`
-  const { summary, splits, consistency, heartRate, fatigue, elevation, tss } =
-    analysis
+  const { summary, splits, consistency, heartRate, fatigue, elevation, tss } = analysis
 
   await db.execute({
     sql: `
@@ -190,9 +184,7 @@ interface SyncOptions {
  * results/ 디렉토리의 모든 data.json을 읽어 DB에 동기화한다.
  * `recalculateTSS` 옵션으로 TSS 재계산, `calculatePMC` 옵션으로 PMC 갱신이 가능하다.
  */
-export async function syncAllSessions(
-  options: SyncOptions = {},
-): Promise<void> {
+export async function syncAllSessions(options: SyncOptions = {}): Promise<void> {
   await initDb()
 
   if (!existsSync(RESULTS_DIR)) {
@@ -215,8 +207,7 @@ export async function syncAllSessions(
       const analysis = JSON.parse(readFileSync(dataPath, 'utf-8'))
 
       if (options.recalculateTSS && !analysis.tss) {
-        const { calculateSessionTSS, getTSSZone } =
-          await import('./tss-calculator.ts')
+        const { calculateSessionTSS, getTSSZone } = await import('./tss-calculator.ts')
         const tssResult = calculateSessionTSS(analysis.summary, settings)
         const tssZone = getTSSZone(tssResult.rtss)
         analysis.tss = {
@@ -304,10 +295,7 @@ export async function getConsecutiveHardSessions() {
 }
 
 /** 지정 거리 ± tolerance(km) 범위의 유사 거리 세션을 최대 10개 조회한다. */
-export async function getSimilarSessions(
-  distance: number,
-  tolerance: number = 2,
-) {
+export async function getSimilarSessions(distance: number, tolerance: number = 2) {
   const result = await db.execute({
     sql: `
       SELECT date, distance, avg_pace, avg_hr, consistency_cv, split_type
@@ -379,23 +367,13 @@ interface DailyMetricsInput {
 }
 
 /** PMC 일별 지표(CTL, ATL, TSB)를 daily_metrics 테이블에 저장한다. */
-export async function upsertDailyMetrics(
-  date: string,
-  metrics: DailyMetricsInput,
-): Promise<void> {
+export async function upsertDailyMetrics(date: string, metrics: DailyMetricsInput): Promise<void> {
   await db.execute({
     sql: `
       INSERT OR REPLACE INTO daily_metrics (date, ctl, atl, tsb, total_tss, sessions_count)
       VALUES (?, ?, ?, ?, ?, ?)
     `,
-    args: [
-      date,
-      metrics.ctl,
-      metrics.atl,
-      metrics.tsb,
-      metrics.totalTss,
-      metrics.sessionsCount,
-    ],
+    args: [date, metrics.ctl, metrics.atl, metrics.tsb, metrics.totalTss, metrics.sessionsCount],
   })
 }
 
