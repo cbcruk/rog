@@ -3,7 +3,7 @@ declare module '@garmin/fitsdk' {
     static fromBuffer(buffer: Buffer): Stream
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   type FitMessage = Record<string, any>
 
   export class Decoder {

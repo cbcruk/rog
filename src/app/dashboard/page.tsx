@@ -5,7 +5,8 @@ import { getPMCData, getPMCSummary } from '@/lib/pmc'
 
 export const dynamic = 'force-dynamic'
 
-const buttonClass = 'inline-flex items-center justify-center rounded-md bg-tx px-4 py-2 text-sm font-medium text-bg hover:bg-tx/90'
+const buttonClass =
+  'inline-flex items-center justify-center rounded-md bg-tx px-4 py-2 text-sm font-medium text-bg hover:bg-tx/90'
 
 function StatusBadge({ status }: { status: string }): React.ReactElement {
   const colors: Record<string, string> = {
@@ -17,7 +18,9 @@ function StatusBadge({ status }: { status: string }): React.ReactElement {
   }
 
   return (
-    <span className={`rounded-full border px-3 py-1 text-sm font-medium ${colors[status] || 'bg-tx-3/10 text-tx-2'}`}>
+    <span
+      className={`rounded-full border px-3 py-1 text-sm font-medium ${colors[status] || 'bg-tx-3/10 text-tx-2'}`}
+    >
       {status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
   )
@@ -32,17 +35,15 @@ function TrendIndicator({ value, label }: { value: number; label: string }): Rea
     <div className="flex items-center gap-1">
       <Icon className={`size-4 ${color}`} />
       <span className={`text-sm ${color}`}>
-        {value > 0 ? '+' : ''}{value.toFixed(1)} ({label})
+        {value > 0 ? '+' : ''}
+        {value.toFixed(1)} ({label})
       </span>
     </div>
   )
 }
 
 export default async function DashboardPage(): Promise<React.ReactElement> {
-  const [pmcData, summary] = await Promise.all([
-    getPMCData(90),
-    getPMCSummary(),
-  ])
+  const [pmcData, summary] = await Promise.all([getPMCData(90), getPMCSummary()])
 
   const hasData = pmcData.length > 0 && summary !== null
 
@@ -118,9 +119,7 @@ export default async function DashboardPage(): Promise<React.ReactElement> {
                 <div className="size-3 rounded-full bg-green-500" />
                 <span className="text-sm font-medium">TSB (Form)</span>
               </div>
-              <p className="text-xs text-tx-2">
-                CTL - ATL. Positive = fresh, negative = fatigued.
-              </p>
+              <p className="text-xs text-tx-2">CTL - ATL. Positive = fresh, negative = fatigued.</p>
             </div>
           </div>
         </>
