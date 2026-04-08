@@ -55,7 +55,7 @@ export default async function SessionPage({
       <h1 className="mt-4 text-2xl font-bold">
         {session.summary.distance}km {session.metadata?.type || 'Run'}
       </h1>
-      <p className="text-(--tx-2)">
+      <p className="text-muted-foreground">
         {formatDate(session.date)} · {formatTime(session.startTime)}
       </p>
 
@@ -64,39 +64,39 @@ export default async function SessionPage({
         <h2 className="mb-2 text-lg font-semibold">Summary</h2>
         <table className="w-full border-collapse text-sm">
           <tbody>
-            <tr className="border-b border-(--ui)">
-              <td className="p-2 text-(--tx-2)">Distance</td>
+            <tr className="border-b">
+              <td className="p-2 text-muted-foreground">Distance</td>
               <td className="p-2 text-right">{session.summary.distance} km</td>
             </tr>
-            <tr className="border-b border-(--ui)">
-              <td className="p-2 text-(--tx-2)">Duration</td>
+            <tr className="border-b">
+              <td className="p-2 text-muted-foreground">Duration</td>
               <td className="p-2 text-right">{session.summary.duration}</td>
             </tr>
-            <tr className="border-b border-(--ui)">
-              <td className="p-2 text-(--tx-2)">Avg Pace</td>
+            <tr className="border-b">
+              <td className="p-2 text-muted-foreground">Avg Pace</td>
               <td className="p-2 text-right">{session.summary.avgPace} /km</td>
             </tr>
-            <tr className="border-b border-(--ui)">
-              <td className="p-2 text-(--tx-2)">Avg HR / Max HR</td>
+            <tr className="border-b">
+              <td className="p-2 text-muted-foreground">Avg HR / Max HR</td>
               <td className="p-2 text-right text-(--red)">
                 {session.summary.avgHeartRate} / {session.summary.maxHeartRate} bpm
               </td>
             </tr>
             {session.summary.avgCadence && (
-              <tr className="border-b border-(--ui)">
-                <td className="p-2 text-(--tx-2)">Cadence</td>
+              <tr className="border-b">
+                <td className="p-2 text-muted-foreground">Cadence</td>
                 <td className="p-2 text-right">{session.summary.avgCadence} spm</td>
               </tr>
             )}
             {session.summary.calories && (
-              <tr className="border-b border-(--ui)">
-                <td className="p-2 text-(--tx-2)">Calories</td>
+              <tr className="border-b">
+                <td className="p-2 text-muted-foreground">Calories</td>
                 <td className="p-2 text-right">{session.summary.calories} kcal</td>
               </tr>
             )}
             {showElevation && (
-              <tr className="border-b border-(--ui)">
-                <td className="p-2 text-(--tx-2)">Elevation</td>
+              <tr className="border-b">
+                <td className="p-2 text-muted-foreground">Elevation</td>
                 <td className="p-2 text-right">
                   +{session.elevation.totalAscent}m / -{session.elevation.totalDescent}m
                 </td>
@@ -113,24 +113,26 @@ export default async function SessionPage({
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-sm">
               <thead>
-                <tr className="border-b border-(--ui)">
-                  <th className="p-2 text-left text-(--tx-2)">km</th>
-                  <th className="p-2 text-right text-(--tx-2)">Pace</th>
-                  <th className="p-2 text-right text-(--tx-2)">HR</th>
-                  <th className="p-2 text-right text-(--tx-2)">Zone</th>
+                <tr className="border-b">
+                  <th className="p-2 text-left text-muted-foreground">km</th>
+                  <th className="p-2 text-right text-muted-foreground">Pace</th>
+                  <th className="p-2 text-right text-muted-foreground">HR</th>
+                  <th className="p-2 text-right text-muted-foreground">Zone</th>
                   {session.laps[0].cadence && (
-                    <th className="p-2 text-right text-(--tx-2)">Cadence</th>
+                    <th className="p-2 text-right text-muted-foreground">Cadence</th>
                   )}
-                  {showElevation && <th className="p-2 text-right text-(--tx-2)">Elev</th>}
+                  {showElevation && <th className="p-2 text-right text-muted-foreground">Elev</th>}
                 </tr>
               </thead>
               <tbody>
                 {session.laps.map((lap) => (
-                  <tr key={lap.km} className="border-b border-(--ui)">
+                  <tr key={lap.km} className="border-b">
                     <td className="p-2">{lap.km}</td>
                     <td className="p-2 text-right">{lap.paceFormatted}</td>
                     <td className="p-2 text-right text-(--red)">{lap.heartRate}</td>
-                    <td className="p-2 text-right text-(--tx-2)">{getHRZone(lap.heartRate)}</td>
+                    <td className="p-2 text-right text-muted-foreground">
+                      {getHRZone(lap.heartRate)}
+                    </td>
                     {lap.cadence && <td className="p-2 text-right">{lap.cadence}</td>}
                     {showElevation && (
                       <td className="p-2 text-right">
@@ -150,16 +152,16 @@ export default async function SessionPage({
         <h2 className="mb-2 text-lg font-semibold">Splits & Consistency</h2>
         <table className="w-full border-collapse text-sm">
           <tbody>
-            <tr className="border-b border-(--ui)">
-              <td className="p-2 text-(--tx-2)">1st Half Pace</td>
+            <tr className="border-b">
+              <td className="p-2 text-muted-foreground">1st Half Pace</td>
               <td className="p-2 text-right">{session.splits.firstHalfPace}</td>
             </tr>
-            <tr className="border-b border-(--ui)">
-              <td className="p-2 text-(--tx-2)">2nd Half Pace</td>
+            <tr className="border-b">
+              <td className="p-2 text-muted-foreground">2nd Half Pace</td>
               <td className="p-2 text-right">{session.splits.secondHalfPace}</td>
             </tr>
-            <tr className="border-b border-(--ui)">
-              <td className="p-2 text-(--tx-2)">Split Type</td>
+            <tr className="border-b">
+              <td className="p-2 text-muted-foreground">Split Type</td>
               <td className="p-2 text-right">
                 <span
                   className={
@@ -171,16 +173,16 @@ export default async function SessionPage({
                 </span>
               </td>
             </tr>
-            <tr className="border-b border-(--ui)">
-              <td className="p-2 text-(--tx-2)">CV</td>
+            <tr className="border-b">
+              <td className="p-2 text-muted-foreground">CV</td>
               <td className="p-2 text-right">{session.consistency.cv}%</td>
             </tr>
-            <tr className="border-b border-(--ui)">
-              <td className="p-2 text-(--tx-2)">Std Dev</td>
+            <tr className="border-b">
+              <td className="p-2 text-muted-foreground">Std Dev</td>
               <td className="p-2 text-right">{session.consistency.stdDevSeconds}s</td>
             </tr>
-            <tr className="border-b border-(--ui)">
-              <td className="p-2 text-(--tx-2)">Rating</td>
+            <tr className="border-b">
+              <td className="p-2 text-muted-foreground">Rating</td>
               <td className="p-2 text-right">
                 <span
                   className={
@@ -205,22 +207,22 @@ export default async function SessionPage({
           <h2 className="mb-2 text-lg font-semibold">Heart Rate</h2>
           <table className="w-full border-collapse text-sm">
             <tbody>
-              <tr className="border-b border-(--ui)">
-                <td className="p-2 text-(--tx-2)">Avg</td>
+              <tr className="border-b">
+                <td className="p-2 text-muted-foreground">Avg</td>
                 <td className="p-2 text-right text-(--red)">
                   {session.heartRate.avgHeartRate} bpm
                 </td>
               </tr>
-              <tr className="border-b border-(--ui)">
-                <td className="p-2 text-(--tx-2)">Min</td>
+              <tr className="border-b">
+                <td className="p-2 text-muted-foreground">Min</td>
                 <td className="p-2 text-right">{session.heartRate.minHeartRate} bpm</td>
               </tr>
-              <tr className="border-b border-(--ui)">
-                <td className="p-2 text-(--tx-2)">Max</td>
+              <tr className="border-b">
+                <td className="p-2 text-muted-foreground">Max</td>
                 <td className="p-2 text-right">{session.heartRate.maxHeartRate} bpm</td>
               </tr>
-              <tr className="border-b border-(--ui)">
-                <td className="p-2 text-(--tx-2)">Drift</td>
+              <tr className="border-b">
+                <td className="p-2 text-muted-foreground">Drift</td>
                 <td className="p-2 text-right">
                   {session.heartRate.drift > 0 ? '+' : ''}
                   {session.heartRate.drift}%
@@ -237,27 +239,27 @@ export default async function SessionPage({
           <h2 className="mb-2 text-lg font-semibold">Intervals</h2>
           <table className="w-full border-collapse text-sm">
             <tbody>
-              <tr className="border-b border-(--ui)">
-                <td className="p-2 text-(--tx-2)">Structure</td>
+              <tr className="border-b">
+                <td className="p-2 text-muted-foreground">Structure</td>
                 <td className="p-2 text-right">{session.intervals.structure}</td>
               </tr>
-              <tr className="border-b border-(--ui)">
-                <td className="p-2 text-(--tx-2)">Sets</td>
+              <tr className="border-b">
+                <td className="p-2 text-muted-foreground">Sets</td>
                 <td className="p-2 text-right">
                   {session.intervals.totalSets}/{session.intervals.targetSets}
                   {session.intervals.completed ? ' (completed)' : ''}
                 </td>
               </tr>
-              <tr className="border-b border-(--ui)">
-                <td className="p-2 text-(--tx-2)">Avg Work HR</td>
+              <tr className="border-b">
+                <td className="p-2 text-muted-foreground">Avg Work HR</td>
                 <td className="p-2 text-right">{session.intervals.summary.avgWorkHR || '-'}</td>
               </tr>
-              <tr className="border-b border-(--ui)">
-                <td className="p-2 text-(--tx-2)">Avg Rest HR</td>
+              <tr className="border-b">
+                <td className="p-2 text-muted-foreground">Avg Rest HR</td>
                 <td className="p-2 text-right">{session.intervals.summary.avgRestHR || '-'}</td>
               </tr>
-              <tr className="border-b border-(--ui)">
-                <td className="p-2 text-(--tx-2)">HR Recovery</td>
+              <tr className="border-b">
+                <td className="p-2 text-muted-foreground">HR Recovery</td>
                 <td className="p-2 text-right">
                   {session.intervals.summary.hrRecovery
                     ? `${session.intervals.summary.hrRecovery} bpm`
@@ -276,32 +278,32 @@ export default async function SessionPage({
           <table className="w-full border-collapse text-sm">
             <tbody>
               {session.metadata.location && (
-                <tr className="border-b border-(--ui)">
-                  <td className="p-2 text-(--tx-2)">Location</td>
+                <tr className="border-b">
+                  <td className="p-2 text-muted-foreground">Location</td>
                   <td className="p-2 text-right">{session.metadata.location}</td>
                 </tr>
               )}
               {session.metadata.intent && (
-                <tr className="border-b border-(--ui)">
-                  <td className="p-2 text-(--tx-2)">Intent</td>
+                <tr className="border-b">
+                  <td className="p-2 text-muted-foreground">Intent</td>
                   <td className="p-2 text-right">{session.metadata.intent}</td>
                 </tr>
               )}
               {session.metadata.rpe && (
-                <tr className="border-b border-(--ui)">
-                  <td className="p-2 text-(--tx-2)">RPE</td>
+                <tr className="border-b">
+                  <td className="p-2 text-muted-foreground">RPE</td>
                   <td className="p-2 text-right">{session.metadata.rpe}/10</td>
                 </tr>
               )}
               {session.metadata.sleepQuality && (
-                <tr className="border-b border-(--ui)">
-                  <td className="p-2 text-(--tx-2)">Sleep</td>
+                <tr className="border-b">
+                  <td className="p-2 text-muted-foreground">Sleep</td>
                   <td className="p-2 text-right">{session.metadata.sleepQuality}</td>
                 </tr>
               )}
               {session.metadata.weather && (
-                <tr className="border-b border-(--ui)">
-                  <td className="p-2 text-(--tx-2)">Weather</td>
+                <tr className="border-b">
+                  <td className="p-2 text-muted-foreground">Weather</td>
                   <td className="p-2 text-right">
                     {session.metadata.weather.condition}, {session.metadata.weather.temperature}°C,{' '}
                     {session.metadata.weather.humidity}%
@@ -309,8 +311,8 @@ export default async function SessionPage({
                 </tr>
               )}
               {session.metadata.notes && (
-                <tr className="border-b border-(--ui)">
-                  <td className="p-2 text-(--tx-2)">Notes</td>
+                <tr className="border-b">
+                  <td className="p-2 text-muted-foreground">Notes</td>
                   <td className="p-2 text-right">{session.metadata.notes}</td>
                 </tr>
               )}
@@ -323,9 +325,7 @@ export default async function SessionPage({
       {session.feedback && (
         <section className="mt-6">
           <h2 className="mb-2 text-lg font-semibold">Coaching Feedback</h2>
-          <pre className="whitespace-pre-wrap rounded bg-(--bg-2) p-4 text-sm">
-            {session.feedback}
-          </pre>
+          <pre className="whitespace-pre-wrap rounded bg-muted p-4 text-sm">{session.feedback}</pre>
         </section>
       )}
     </div>

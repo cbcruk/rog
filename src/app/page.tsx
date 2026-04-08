@@ -9,9 +9,9 @@ export default function Home(): React.ReactElement {
       <h1 className="mb-6 text-xl font-bold">Sessions</h1>
 
       {sessions.length === 0 ? (
-        <div className="rounded-lg border border-tx-3 bg-bg-2 p-8 text-center">
-          <p className="text-tx-2">세션이 없습니다</p>
-          <p className="mt-2 text-sm text-tx-3">
+        <div className="rounded-lg border bg-muted p-8 text-center">
+          <p className="text-muted-foreground">세션이 없습니다</p>
+          <p className="mt-2 text-sm text-muted-foreground/60">
             data/ 폴더에 FIT 파일을 넣고 `pnpm analyze`를 실행하세요
           </p>
         </div>

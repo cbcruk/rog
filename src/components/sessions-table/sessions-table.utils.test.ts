@@ -105,7 +105,7 @@ describe('getSessionTypeColor', () => {
   })
 
   it('매칭되지 않으면 tx-2 색상을 반환한다', () => {
-    expect(getSessionTypeColor('unknown')).toBe('var(--tx-2)')
+    expect(getSessionTypeColor('unknown')).toBe('var(--muted-foreground)')
   })
 })
 

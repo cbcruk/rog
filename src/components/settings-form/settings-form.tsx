@@ -23,11 +23,11 @@ export function SettingsForm({ settings }: SettingsFormProps): React.ReactElemen
               defaultValue={settings.lthr}
               min={100}
               max={220}
-              className="w-full rounded-md border border-tx-3 bg-bg-2 px-3 py-2 text-sm focus:border-tx focus:outline-none"
+              className="w-full rounded-md border bg-muted px-3 py-2 text-sm focus:border-foreground focus:outline-none"
             />
-            <span className="text-sm text-tx-2">bpm</span>
+            <span className="text-sm text-muted-foreground">bpm</span>
           </div>
-          <p className="text-xs text-tx-3">1 hour max sustainable pace HR</p>
+          <p className="text-xs text-muted-foreground/60">1 hour max sustainable pace HR</p>
         </div>
 
         <div className="space-y-2">
@@ -42,11 +42,11 @@ export function SettingsForm({ settings }: SettingsFormProps): React.ReactElemen
               defaultValue={settings.rest_hr}
               min={30}
               max={100}
-              className="w-full rounded-md border border-tx-3 bg-bg-2 px-3 py-2 text-sm focus:border-tx focus:outline-none"
+              className="w-full rounded-md border bg-muted px-3 py-2 text-sm focus:border-foreground focus:outline-none"
             />
-            <span className="text-sm text-tx-2">bpm</span>
+            <span className="text-sm text-muted-foreground">bpm</span>
           </div>
-          <p className="text-xs text-tx-3">Morning resting heart rate</p>
+          <p className="text-xs text-muted-foreground/60">Morning resting heart rate</p>
         </div>
 
         <div className="space-y-2">
@@ -61,11 +61,11 @@ export function SettingsForm({ settings }: SettingsFormProps): React.ReactElemen
               defaultValue={settings.max_hr}
               min={150}
               max={230}
-              className="w-full rounded-md border border-tx-3 bg-bg-2 px-3 py-2 text-sm focus:border-tx focus:outline-none"
+              className="w-full rounded-md border bg-muted px-3 py-2 text-sm focus:border-foreground focus:outline-none"
             />
-            <span className="text-sm text-tx-2">bpm</span>
+            <span className="text-sm text-muted-foreground">bpm</span>
           </div>
-          <p className="text-xs text-tx-3">Maximum heart rate</p>
+          <p className="text-xs text-muted-foreground/60">Maximum heart rate</p>
         </div>
 
         <div className="space-y-2">
@@ -80,11 +80,13 @@ export function SettingsForm({ settings }: SettingsFormProps): React.ReactElemen
               defaultValue={settings.ftp_pace}
               min={180}
               max={600}
-              className="w-full rounded-md border border-tx-3 bg-bg-2 px-3 py-2 text-sm focus:border-tx focus:outline-none"
+              className="w-full rounded-md border bg-muted px-3 py-2 text-sm focus:border-foreground focus:outline-none"
             />
-            <span className="text-sm text-tx-2">sec/km</span>
+            <span className="text-sm text-muted-foreground">sec/km</span>
           </div>
-          <p className="text-xs text-tx-3">1 hour sustainable pace (e.g., 270 = 4:30/km)</p>
+          <p className="text-xs text-muted-foreground/60">
+            1 hour sustainable pace (e.g., 270 = 4:30/km)
+          </p>
         </div>
       </div>
 

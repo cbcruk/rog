@@ -58,7 +58,7 @@ const SESSION_TYPE_COLORS: Record<SessionBadgeVariant, string> = {
   longRun: 'var(--blue)',
   progression: 'var(--purple)',
   trail: 'var(--cyan)',
-  outline: 'var(--tx-2)',
+  outline: 'var(--muted-foreground)',
 }
 
 export function getSessionTypeColor(label: string): string {

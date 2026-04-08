@@ -26,7 +26,9 @@ export function NavLink({
       href={href}
       className={cn(
         'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
-        isActive ? 'bg-tx/10 text-tx font-medium' : 'text-tx-2 hover:bg-tx/5 hover:text-tx',
+        isActive
+          ? 'bg-foreground/10 text-foreground font-medium'
+          : 'text-muted-foreground hover:bg-foreground/5 hover:text-foreground',
       )}
     >
       <Icon className="size-5" />
@@ -49,7 +51,7 @@ export function MobileNavLink({
       href={href}
       className={cn(
         'flex flex-col items-center gap-1 py-2 text-xs transition-colors',
-        isActive ? 'text-tx' : 'text-tx-3 hover:text-tx-2',
+        isActive ? 'text-foreground' : 'text-muted-foreground/60 hover:text-muted-foreground',
       )}
     >
       <Icon className="size-5" />

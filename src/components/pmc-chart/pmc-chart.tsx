@@ -19,7 +19,7 @@ const COLORS = {
   atl: 'var(--color-magenta)',
   tsbPositive: 'var(--color-green)',
   tsbNegative: 'var(--color-red)',
-  grid: 'var(--color-tx-3)',
+  grid: 'var(--color-muted-foreground)',
 }
 
 function formatDate(dateStr: string): string {
@@ -39,8 +39,8 @@ function CustomTooltip({
   if (!active || !payload) return null
 
   return (
-    <div className="rounded-lg border border-tx-3 bg-bg p-3 shadow-lg">
-      <p className="mb-2 text-sm text-tx-2">{label}</p>
+    <div className="rounded-lg border bg-background p-3 shadow-lg">
+      <p className="mb-2 text-sm text-muted-foreground">{label}</p>
       {payload.map((entry) => (
         <p key={entry.name} className="text-sm" style={{ color: entry.color }}>
           {entry.name}: {entry.value.toFixed(1)}

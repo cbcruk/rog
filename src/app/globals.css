@@ -5,23 +5,14 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Flexoki Light */
-  --bg: #fffcf0;
-  --bg-2: #f2f0e5;
-  --tx: #100f0f;
-  --tx-2: #6f6e69;
-  --tx-3: #b7b5ac;
-  --ui: #e6e4d9;
-  --ui-2: #dad8ce;
-
-  --red: #af3029;
-  --orange: #bc5215;
-  --yellow: #ad8301;
-  --green: #66800b;
-  --cyan: #24837b;
-  --blue: #205ea6;
-  --purple: #5e409d;
-  --magenta: #a02f6f;
+  --red: oklch(0.577 0.245 27.325);
+  --orange: oklch(0.646 0.222 41.116);
+  --yellow: oklch(0.702 0.183 83.87);
+  --green: oklch(0.627 0.194 149.214);
+  --cyan: oklch(0.609 0.126 197.828);
+  --blue: oklch(0.546 0.245 262.881);
+  --purple: oklch(0.541 0.281 292.717);
+  --magenta: oklch(0.554 0.244 342.131);
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -58,25 +49,14 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Flexoki Dark */
-    --bg: #100f0f;
-    --bg-2: #1c1b1a;
-    --tx: #fffcf0;
-    --tx-2: #878580;
-    --tx-3: #575653;
-    --ui: #282726;
-    --ui-2: #343331;
-
-    --red: #d14d41;
-    --orange: #da702c;
-    --yellow: #d0a215;
-    --green: #879a39;
-    --cyan: #3aa99f;
-    --blue: #4385be;
-    --purple: #8b7ec8;
-    --magenta: #ce5d97;
-
-    /* shadcn dark */
+    --red: oklch(0.704 0.191 22.216);
+    --orange: oklch(0.702 0.194 41.116);
+    --yellow: oklch(0.795 0.184 86.047);
+    --green: oklch(0.723 0.219 149.579);
+    --cyan: oklch(0.715 0.143 201.238);
+    --blue: oklch(0.623 0.214 259.815);
+    --purple: oklch(0.714 0.203 290.366);
+    --magenta: oklch(0.656 0.241 354.308);
     --background: oklch(0.145 0 0);
     --foreground: oklch(0.985 0 0);
     --card: oklch(0.205 0 0);
@@ -111,14 +91,17 @@
   }
 }
 
-body {
-  background: var(--bg);
-  color: var(--tx);
-}
-
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: var(--font-sans);
+  --color-red: var(--red);
+  --color-orange: var(--orange);
+  --color-yellow: var(--yellow);
+  --color-green: var(--green);
+  --color-cyan: var(--cyan);
+  --color-blue: var(--blue);
+  --color-purple: var(--purple);
+  --color-magenta: var(--magenta);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -197,9 +180,11 @@ body {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
   html {
     @apply font-sans;
   }

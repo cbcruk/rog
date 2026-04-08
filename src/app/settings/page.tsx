@@ -10,18 +10,18 @@ export default async function SettingsPage(): Promise<React.ReactElement> {
     <div className="p-4 lg:p-6">
       <h1 className="mb-6 text-xl font-bold">Settings</h1>
 
-      <div className="rounded-lg border border-tx-3 bg-bg-2 p-6">
+      <div className="rounded-lg border bg-muted p-6">
         <h2 className="mb-4 text-lg font-medium">Training Zones</h2>
-        <p className="mb-6 text-sm text-tx-2">
+        <p className="mb-6 text-sm text-muted-foreground">
           Configure your heart rate zones and threshold values for accurate TSS calculation.
         </p>
 
         <SettingsForm settings={settings} />
       </div>
 
-      <div className="mt-6 rounded-lg border border-tx-3 bg-bg-2 p-6">
+      <div className="mt-6 rounded-lg border bg-muted p-6">
         <h2 className="mb-4 text-lg font-medium">How TSS is Calculated</h2>
-        <div className="space-y-3 text-sm text-tx-2">
+        <div className="space-y-3 text-sm text-muted-foreground">
           <p>
             <strong>hrTSS</strong> = Duration (hours) x IF² x 100
           </p>

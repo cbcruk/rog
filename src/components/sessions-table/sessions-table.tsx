@@ -119,7 +119,7 @@ function buildWeekFlowData(group: WeekGroup): FlowDataPoint[] {
         day: day.dayLabel,
         distance: 0,
         avgHR: null,
-        color: 'var(--ui-2)',
+        color: 'var(--input)',
         type: 'Rest',
       }
     }
@@ -157,9 +157,9 @@ function FlowChartTooltip({
   if (data.distance === 0) return null
 
   return (
-    <div className="rounded-lg border border-ui bg-bg-2 px-3 py-2 text-xs shadow-md tabular-nums">
+    <div className="rounded-lg border bg-muted px-3 py-2 text-xs shadow-md tabular-nums">
       <div className="font-medium">{data.type}</div>
-      <div className="mt-1 flex flex-col gap-0.5 text-tx-2">
+      <div className="mt-1 flex flex-col gap-0.5 text-muted-foreground">
         <span>{data.distance} km</span>
         {data.avgHR && <span>HR {data.avgHR} bpm</span>}
       </div>
@@ -172,7 +172,7 @@ function WeeklyFlowChart({ group }: { group: WeekGroup }): React.ReactElement {
   const maxDistance = Math.max(...data.map((d) => d.distance))
 
   return (
-    <div className="mt-3 rounded-lg border border-ui bg-bg-2 p-3">
+    <div className="mt-3 rounded-lg border bg-muted p-3">
       <ResponsiveContainer width="100%" height={120}>
         <ComposedChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
           <XAxis dataKey="day" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
@@ -211,12 +211,12 @@ function WeeklyCalendar({ group }: { group: WeekGroup }): React.ReactElement {
 
   return (
     <TooltipProvider>
-      <div className="grid grid-cols-7 overflow-hidden rounded-lg border border-ui bg-bg-2">
+      <div className="grid grid-cols-7 overflow-hidden rounded-lg border bg-muted">
         {days.map((day, i) => (
-          <div key={i} className={`min-h-16 ${i < 6 ? 'border-r border-ui' : ''}`}>
-            <div className="border-b border-ui px-1.5 py-1 text-center">
-              <div className="text-[10px] text-tx-2">{day.dayLabel}</div>
-              <div className="text-xs text-tx-3">{day.dateNum}</div>
+          <div key={i} className={`min-h-16 ${i < 6 ? 'border-r' : ''}`}>
+            <div className="border-b px-1.5 py-1 text-center">
+              <div className="text-[10px] text-muted-foreground">{day.dayLabel}</div>
+              <div className="text-xs text-muted-foreground/60">{day.dateNum}</div>
             </div>
             <div className="space-y-1 p-1">
               {day.sessions.map((session) => {
@@ -289,9 +289,9 @@ export function SessionsTable({ sessions }: SessionsTableProps): React.ReactElem
     <div className="space-y-6">
       {weekGroups.map((group) => (
         <div key={group.week}>
-          <div className="sticky top-0 z-10 flex items-center justify-between bg-bg px-1 py-2">
+          <div className="sticky top-0 z-10 flex items-center justify-between bg-background px-1 py-2">
             <span className="font-semibold">{group.weekRange}</span>
-            <span className="text-sm text-tx-2">
+            <span className="text-sm text-muted-foreground">
               {group.totalDistance.toFixed(1)}km · {formatDuration(group.totalDurationMinutes)}
             </span>
           </div>
