@@ -12,6 +12,7 @@ function createDbClient(): ReturnType<typeof createClient> {
   return createClient({ url: 'file:sessions.db' })
 }
 
+/** 최근 N일간의 PMC 일별 데이터(CTL, ATL, TSB, TSS)를 조회한다. */
 export async function getPMCData(days: number = 90): Promise<PMCDataPoint[]> {
   const db = createDbClient()
   const fromDate = new Date()
@@ -36,6 +37,7 @@ export async function getPMCData(days: number = 90): Promise<PMCDataPoint[]> {
   }))
 }
 
+/** 가장 최근 날짜의 PMC 지표를 반환한다. 데이터가 없으면 null. */
 export async function getLatestPMC(): Promise<DailyMetrics | null> {
   const db = createDbClient()
 
@@ -59,6 +61,7 @@ export async function getLatestPMC(): Promise<DailyMetrics | null> {
   }
 }
 
+/** TSB 값을 fresh/recovered/neutral/tired/overreaching 상태로 분류한다. */
 export function getFitnessStatus(tsb: number | null): FitnessStatus {
   if (tsb === null) {
     return { status: 'unknown', label: 'N/A', color: 'gray' }
@@ -77,6 +80,7 @@ export function getFitnessStatus(tsb: number | null): FitnessStatus {
   }
 }
 
+/** 대시보드용 PMC 요약을 반환한다. 현재 CTL/ATL/TSB, 주간 TSS, 컨디션 상태, 7일/28일 CTL 추세를 포함한다. */
 export async function getPMCSummary(): Promise<PMCSummary | null> {
   const db = createDbClient()
 
@@ -148,6 +152,7 @@ export async function getPMCSummary(): Promise<PMCSummary | null> {
   }
 }
 
+/** 최근 N주간의 주별 총 TSS를 조회한다. */
 export async function getWeeklyTSSHistory(
   weeks: number = 12,
 ): Promise<{ week: string; tss: number }[]> {

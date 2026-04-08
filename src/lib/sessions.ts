@@ -6,6 +6,7 @@ console.log(process.cwd())
 
 const RESULTS_DIR = join(process.cwd(), 'results')
 
+/** results/ 디렉토리의 모든 세션을 날짜 역순으로 로드한다. 각 세션에 feedback.md가 있으면 함께 포함한다. */
 export function getAllSessions(): SessionWithFeedback[] {
   if (!existsSync(RESULTS_DIR)) {
     return []
@@ -46,6 +47,7 @@ export function getAllSessions(): SessionWithFeedback[] {
   return sessions
 }
 
+/** ID(폴더명)로 단일 세션을 로드한다. 존재하지 않으면 null을 반환한다. */
 export function getSession(id: string): SessionWithFeedback | null {
   const dataPath = join(RESULTS_DIR, id, 'data.json')
   const feedbackPath = join(RESULTS_DIR, id, 'feedback.md')
@@ -72,6 +74,7 @@ export function getSession(id: string): SessionWithFeedback | null {
   }
 }
 
+/** results/ 디렉토리에서 data.json이 존재하는 세션 ID 목록을 날짜 역순으로 반환한다. */
 export function getAllSessionIds(): string[] {
   if (!existsSync(RESULTS_DIR)) {
     return []
