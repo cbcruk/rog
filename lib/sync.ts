@@ -1,4 +1,3 @@
-// @ts-expect-error -- dotenv has no type declarations
 import 'dotenv/config'
 import GarminConnect, { type Activity } from 'garmin-connect'
 import { existsSync, mkdirSync, readdirSync, unlinkSync, renameSync } from 'fs'

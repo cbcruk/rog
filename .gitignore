@@ -45,6 +45,7 @@ garmin.config.json
 # personal data
 /data
 /results
+sessions.db
 
 # claude code memory
 .claude/projects/

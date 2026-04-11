@@ -28,10 +28,14 @@ import {
 
 interface WeekGroup {
   week: string
+  weekNumber: number
   weekRange: string
   sessions: SessionWithFeedback[]
   totalDistance: number
   totalDurationMinutes: number
+  avgHeartRate: number
+  totalAscent: number
+  sessionCount: number
 }
 
 function groupSessionsByWeek(sessions: SessionWithFeedback[]): WeekGroup[] {
@@ -44,20 +48,32 @@ function groupSessionsByWeek(sessions: SessionWithFeedback[]): WeekGroup[] {
     if (!groups.has(week)) {
       groups.set(week, {
         week,
+        weekNumber: Number(week.split('-W')[1]),
         weekRange: formatWeekRange(session.date),
         sessions: [session],
         totalDistance: session.summary.distance,
         totalDurationMinutes: durationMinutes,
+        avgHeartRate: 0,
+        totalAscent: session.elevation?.totalAscent ?? 0,
+        sessionCount: 1,
       })
     } else {
       const group = groups.get(week)!
       group.sessions.push(session)
       group.totalDistance += session.summary.distance
       group.totalDurationMinutes += durationMinutes
+      group.totalAscent += session.elevation?.totalAscent ?? 0
+      group.sessionCount++
     }
   }
 
-  return Array.from(groups.values())
+  const result = Array.from(groups.values())
+  for (const group of result) {
+    group.avgHeartRate = Math.round(
+      group.sessions.reduce((sum, s) => sum + s.summary.avgHeartRate, 0) / group.sessions.length,
+    )
+  }
+  return result
 }
 
 function formatDuration(minutes: number): string {
@@ -289,11 +305,45 @@ export function SessionsTable({ sessions }: SessionsTableProps): React.ReactElem
     <div className="space-y-6">
       {weekGroups.map((group) => (
         <div key={group.week}>
-          <div className="sticky top-0 z-10 flex items-center justify-between bg-background px-1 py-2">
-            <span className="font-semibold">{group.weekRange}</span>
-            <span className="text-sm text-muted-foreground">
-              {group.totalDistance.toFixed(1)}km · {formatDuration(group.totalDurationMinutes)}
-            </span>
+          <div className="sticky top-0 z-10 bg-background pb-2 pt-3">
+            <div className="flex items-baseline justify-between">
+              <div className="flex items-baseline gap-2">
+                <h3 className="text-lg font-semibold">{group.weekNumber}주차</h3>
+                <span className="text-xs text-muted-foreground">{group.weekRange}</span>
+              </div>
+              <span className="text-xs tabular-nums text-muted-foreground">
+                {group.sessionCount}회
+              </span>
+            </div>
+            <div className="mt-2 grid grid-cols-4 gap-px overflow-hidden rounded-lg border bg-border">
+              <div className="flex flex-col bg-background px-3 py-2">
+                <span className="text-[11px] text-muted-foreground">거리</span>
+                <span className="text-sm font-semibold tabular-nums">
+                  {group.totalDistance.toFixed(1)}
+                  <span className="ml-0.5 text-xs font-normal text-muted-foreground">km</span>
+                </span>
+              </div>
+              <div className="flex flex-col bg-background px-3 py-2">
+                <span className="text-[11px] text-muted-foreground">시간</span>
+                <span className="text-sm font-semibold tabular-nums">
+                  {formatDuration(group.totalDurationMinutes)}
+                </span>
+              </div>
+              <div className="flex flex-col bg-background px-3 py-2">
+                <span className="text-[11px] text-muted-foreground">평균 HR</span>
+                <span className="text-sm font-semibold tabular-nums">
+                  {group.avgHeartRate}
+                  <span className="ml-0.5 text-xs font-normal text-muted-foreground">bpm</span>
+                </span>
+              </div>
+              <div className="flex flex-col bg-background px-3 py-2">
+                <span className="text-[11px] text-muted-foreground">획득고도</span>
+                <span className="text-sm font-semibold tabular-nums">
+                  {group.totalAscent}
+                  <span className="ml-0.5 text-xs font-normal text-muted-foreground">m</span>
+                </span>
+              </div>
+            </div>
           </div>
 
           <WeeklyCalendar group={group} />
