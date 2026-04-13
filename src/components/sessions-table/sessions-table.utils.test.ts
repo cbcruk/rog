@@ -12,6 +12,10 @@ import {
   parseDurationToMinutes,
   calculateWeeklyStats,
   getSessionWeeklyPercent,
+  formatDuration,
+  groupSessionsByWeek,
+  buildWeekCalendarData,
+  buildWeekFlowData,
 } from './sessions-table.utils'
 import type { SessionWithFeedback } from '@/types/running'
 
@@ -246,5 +250,172 @@ describe('getSessionWeeklyPercent', () => {
 
     expect(percent.distancePercent).toBe(0)
     expect(percent.durationPercent).toBe(0)
+  })
+})
+
+describe('formatDuration', () => {
+  it('60분 미만이면 분만 표시한다', () => {
+    expect(formatDuration(45)).toBe('45m')
+    expect(formatDuration(0)).toBe('0m')
+  })
+
+  it('60분 이상이면 시간과 분을 표시한다', () => {
+    expect(formatDuration(90)).toBe('1h 30m')
+    expect(formatDuration(120)).toBe('2h 0m')
+    expect(formatDuration(150.7)).toBe('2h 31m')
+  })
+})
+
+describe('groupSessionsByWeek', () => {
+  it('같은 주의 세션을 하나의 그룹으로 묶는다', () => {
+    const sessions = [
+      createMockSession({
+        date: '2026-03-16',
+        summary: {
+          ...createMockSession().summary,
+          distance: 10,
+          duration: '50:00',
+          avgHeartRate: 140,
+        },
+      }),
+      createMockSession({
+        id: 'session-2',
+        date: '2026-03-17',
+        summary: {
+          ...createMockSession().summary,
+          distance: 5,
+          duration: '25:00',
+          avgHeartRate: 150,
+        },
+      }),
+    ]
+
+    const groups = groupSessionsByWeek(sessions)
+    expect(groups).toHaveLength(1)
+    expect(groups[0].sessions).toHaveLength(2)
+    expect(groups[0].totalDistance).toBe(15)
+    expect(groups[0].sessionCount).toBe(2)
+  })
+
+  it('다른 주의 세션은 별도 그룹으로 분리한다', () => {
+    const sessions = [
+      createMockSession({ date: '2026-03-09' }),
+      createMockSession({ id: 'session-2', date: '2026-03-16' }),
+    ]
+
+    const groups = groupSessionsByWeek(sessions)
+    expect(groups).toHaveLength(2)
+  })
+
+  it('평균 심박을 계산한다', () => {
+    const sessions = [
+      createMockSession({
+        date: '2026-03-16',
+        summary: { ...createMockSession().summary, avgHeartRate: 140 },
+      }),
+      createMockSession({
+        id: 'session-2',
+        date: '2026-03-17',
+        summary: { ...createMockSession().summary, avgHeartRate: 160 },
+      }),
+    ]
+
+    const groups = groupSessionsByWeek(sessions)
+    expect(groups[0].avgHeartRate).toBe(150)
+  })
+
+  it('획득고도를 합산한다', () => {
+    const sessions = [
+      createMockSession({
+        date: '2026-03-16',
+        elevation: { totalAscent: 100, totalDescent: 90 },
+      }),
+      createMockSession({
+        id: 'session-2',
+        date: '2026-03-17',
+        elevation: { totalAscent: 200, totalDescent: 180 },
+      }),
+    ]
+
+    const groups = groupSessionsByWeek(sessions)
+    expect(groups[0].totalAscent).toBe(300)
+  })
+
+  it('weekNumber와 weekRange를 포함한다', () => {
+    const sessions = [createMockSession({ date: '2026-03-16' })]
+    const groups = groupSessionsByWeek(sessions)
+
+    expect(groups[0].weekNumber).toBeGreaterThan(0)
+    expect(groups[0].weekRange).toMatch(/^\d{1,2}\/\d{1,2} - \d{1,2}\/\d{1,2}$/)
+  })
+})
+
+describe('buildWeekCalendarData', () => {
+  it('7일 배열을 반환한다', () => {
+    const sessions = [createMockSession({ date: '2026-03-18' })]
+    const { start } = getWeekRange('2026-03-18')
+    const days = buildWeekCalendarData(sessions, start)
+
+    expect(days).toHaveLength(7)
+    expect(days[0].dayLabel).toBe('월')
+    expect(days[6].dayLabel).toBe('일')
+  })
+
+  it('세션을 해당 요일에 배치한다', () => {
+    const sessions = [createMockSession({ date: '2026-03-18' })]
+    const { start } = getWeekRange('2026-03-18')
+    const days = buildWeekCalendarData(sessions, start)
+
+    const dayWithSession = days.find((d) => d.sessions.length > 0)
+    expect(dayWithSession).toBeDefined()
+    expect(dayWithSession!.sessions[0].id).toBe('test-session')
+  })
+
+  it('세션이 없는 날은 빈 배열을 갖는다', () => {
+    const sessions = [createMockSession({ date: '2026-03-18' })]
+    const { start } = getWeekRange('2026-03-18')
+    const days = buildWeekCalendarData(sessions, start)
+
+    const emptyDays = days.filter((d) => d.sessions.length === 0)
+    expect(emptyDays.length).toBe(6)
+  })
+})
+
+describe('buildWeekFlowData', () => {
+  it('7일 배열을 반환한다', () => {
+    const sessions = [createMockSession({ date: '2026-03-18' })]
+    const { start } = getWeekRange('2026-03-18')
+    const data = buildWeekFlowData(sessions, start)
+
+    expect(data).toHaveLength(7)
+  })
+
+  it('세션이 없는 날은 distance 0, type Rest를 갖는다', () => {
+    const sessions = [createMockSession({ date: '2026-03-18' })]
+    const { start } = getWeekRange('2026-03-18')
+    const data = buildWeekFlowData(sessions, start)
+
+    const restDays = data.filter((d) => d.distance === 0)
+    expect(restDays.length).toBe(6)
+    expect(restDays[0].type).toBe('Rest')
+    expect(restDays[0].avgHR).toBeNull()
+  })
+
+  it('세션이 있는 날은 거리와 심박을 포함한다', () => {
+    const sessions = [
+      createMockSession({
+        date: '2026-03-18',
+        summary: { ...createMockSession().summary, distance: 8.5, avgHeartRate: 145 },
+      }),
+    ]
+    const { start } = getWeekRange('2026-03-18')
+    const data = buildWeekFlowData(sessions, start)
+
+    const activeDay = data.find((d) => d.distance > 0)
+    expect(activeDay).toBeDefined()
+    expect(activeDay!.distance).toBe(8.5)
+    expect(activeDay!.avgHR).toBe(145)
+    expect(activeDay!.color).toBeDefined()
+    expect(activeDay!.type).not.toBe('Rest')
   })
 })
