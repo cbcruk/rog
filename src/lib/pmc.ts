@@ -64,20 +64,67 @@ export async function getLatestPMC(): Promise<DailyMetrics | null> {
 /** TSB 값을 fresh/recovered/neutral/tired/overreaching 상태로 분류한다. */
 export function getFitnessStatus(tsb: number | null): FitnessStatus {
   if (tsb === null) {
-    return { status: 'unknown', label: 'N/A', color: 'gray' }
+    return {
+      status: 'unknown',
+      label: '데이터 없음',
+      color: 'gray',
+      advice: '데이터가 부족해 상태를 판정할 수 없어요.',
+    }
   }
 
   if (tsb > 25) {
-    return { status: 'fresh', label: 'Fresh', color: 'green' }
+    return {
+      status: 'fresh',
+      label: '최상 (Fresh)',
+      color: 'green',
+      advice: '컨디션이 최상이에요. 고강도 훈련이나 레이스에 적합합니다.',
+    }
   } else if (tsb > 5) {
-    return { status: 'recovered', label: 'Recovered', color: 'blue' }
+    return {
+      status: 'recovered',
+      label: '회복 (Recovered)',
+      color: 'blue',
+      advice: '회복된 상태예요. 가벼운~중간 강도 훈련이 적합합니다.',
+    }
   } else if (tsb > -10) {
-    return { status: 'neutral', label: 'Neutral', color: 'yellow' }
+    return {
+      status: 'neutral',
+      label: '보통 (Neutral)',
+      color: 'yellow',
+      advice: '평상시 컨디션이에요. 평소 훈련량을 유지하면 좋습니다.',
+    }
   } else if (tsb > -30) {
-    return { status: 'tired', label: 'Tired', color: 'orange' }
+    return {
+      status: 'tired',
+      label: '피로 (Tired)',
+      color: 'orange',
+      advice: '피로가 쌓여 있어요. 회복 러닝이나 휴식을 권장합니다.',
+    }
   } else {
-    return { status: 'overreaching', label: 'Overreaching', color: 'red' }
+    return {
+      status: 'overreaching',
+      label: '과훈련 (Overreaching)',
+      color: 'red',
+      advice: '과훈련 위험이 있어요. 며칠간 충분한 휴식이 필요합니다.',
+    }
   }
+}
+
+/**
+ * 주간 TSS를 현재 체력 유지에 필요한 부하(CTL × 7)와 비교해 해석한다.
+ * 절대값이 아니라 개인 체력 수준 대비 상대적 부하를 표현한다.
+ */
+export function getWeeklyTSSComparison(weeklyTSS: number, currentCTL: number): string {
+  if (currentCTL <= 0) return '체력 데이터 부족 — 기준 비교 불가'
+
+  const maintenance = currentCTL * 7
+  const ratio = weeklyTSS / maintenance
+  const percent = Math.round((ratio - 1) * 100)
+
+  if (ratio < 0.8) return `체력 유지 수준보다 ${-percent}% 낮음 — 체력이 감소할 수 있습니다`
+  if (ratio < 1.2) return `체력 유지 수준 (${percent >= 0 ? '+' : ''}${percent}%)`
+  if (ratio < 1.5) return `체력 증가 구간 (+${percent}%) — 안정적으로 부하를 늘리는 중`
+  return `급격한 부하 증가 (+${percent}%) — 부상·오버트레이닝 위험`
 }
 
 /** 대시보드용 PMC 요약을 반환한다. 현재 CTL/ATL/TSB, 주간 TSS, 컨디션 상태, 7일/28일 CTL 추세를 포함한다. */

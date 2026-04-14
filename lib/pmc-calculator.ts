@@ -96,19 +96,49 @@ export async function calculateAndStorePMC(): Promise<PMCDataPoint[]> {
 /** TSB 값을 fresh/recovered/neutral/tired/overreaching 상태로 분류한다. */
 export function getFitnessStatus(tsb: number | null): FitnessStatus {
   if (tsb === null || tsb === undefined) {
-    return { status: 'unknown', label: 'N/A', color: 'gray' }
+    return {
+      status: 'unknown',
+      label: 'N/A',
+      color: 'gray',
+      advice: '데이터가 부족해 상태를 판정할 수 없어요.',
+    }
   }
 
   if (tsb > 25) {
-    return { status: 'fresh', label: 'Fresh', color: 'green' }
+    return {
+      status: 'fresh',
+      label: 'Fresh',
+      color: 'green',
+      advice: '컨디션이 최상이에요. 고강도 훈련이나 레이스에 적합합니다.',
+    }
   } else if (tsb > 5) {
-    return { status: 'recovered', label: 'Recovered', color: 'blue' }
+    return {
+      status: 'recovered',
+      label: 'Recovered',
+      color: 'blue',
+      advice: '회복된 상태예요. 가벼운~중간 강도 훈련이 적합합니다.',
+    }
   } else if (tsb > -10) {
-    return { status: 'neutral', label: 'Neutral', color: 'yellow' }
+    return {
+      status: 'neutral',
+      label: 'Neutral',
+      color: 'yellow',
+      advice: '평상시 컨디션이에요. 평소 훈련량을 유지하면 좋습니다.',
+    }
   } else if (tsb > -30) {
-    return { status: 'tired', label: 'Tired', color: 'orange' }
+    return {
+      status: 'tired',
+      label: 'Tired',
+      color: 'orange',
+      advice: '피로가 쌓여 있어요. 회복 러닝이나 휴식을 권장합니다.',
+    }
   } else {
-    return { status: 'overreaching', label: 'Overreaching', color: 'red' }
+    return {
+      status: 'overreaching',
+      label: 'Overreaching',
+      color: 'red',
+      advice: '과훈련 위험이 있어요. 며칠간 충분한 휴식이 필요합니다.',
+    }
   }
 }
 

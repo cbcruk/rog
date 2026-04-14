@@ -4,7 +4,7 @@ import { Noto_Sans_KR } from 'next/font/google'
 import type { RootLayoutProps } from './layout.types'
 import { cn } from '@/lib/utils'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { MainLayout } from '@/components/layout'
+import { MainLayout } from '@/components/layout/main-layout'
 
 const notoSans = Noto_Sans_KR({
   weight: ['400', '500', '900'],

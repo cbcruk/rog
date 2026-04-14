@@ -88,7 +88,7 @@ export function PMCChart({
         <Area
           type="monotone"
           dataKey="ctl"
-          name="CTL (Fitness)"
+          name="CTL (체력)"
           stroke={COLORS.ctl}
           fill="url(#ctlGradient)"
           strokeWidth={2}
@@ -96,7 +96,7 @@ export function PMCChart({
         <Area
           type="monotone"
           dataKey="atl"
-          name="ATL (Fatigue)"
+          name="ATL (피로)"
           stroke={COLORS.atl}
           fill="url(#atlGradient)"
           strokeWidth={2}
@@ -104,7 +104,7 @@ export function PMCChart({
         <Line
           type="monotone"
           dataKey="tsb"
-          name="TSB (Form)"
+          name="TSB (폼)"
           stroke={COLORS.tsbPositive}
           strokeWidth={2}
           dot={false}

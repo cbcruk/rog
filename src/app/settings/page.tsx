@@ -1,4 +1,4 @@
-import { SettingsForm } from '@/components/settings-form'
+import { SettingsForm } from '@/components/settings-form/settings-form'
 import { getSettings } from '@/lib/settings'
 
 export const dynamic = 'force-dynamic'

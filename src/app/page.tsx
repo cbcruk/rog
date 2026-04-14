@@ -1,5 +1,5 @@
 import { getAllSessions } from '@/lib/sessions'
-import { SessionsTable } from '@/components/sessions-table'
+import { SessionsTable } from '@/components/sessions-table/sessions-table'
 
 export default function Home(): React.ReactElement {
   const sessions = getAllSessions()

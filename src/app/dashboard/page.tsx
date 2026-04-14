@@ -1,131 +1,38 @@
-import Link from 'next/link'
-import { Activity, TrendingUp, TrendingDown, Minus } from 'lucide-react'
-import { PMCChart } from '@/components/pmc-chart'
+import { EmptyState } from '@/components/dashboard/empty-state'
+import { PMCChartCard } from '@/components/dashboard/pmc-chart-card'
+import { PMCLegend } from '@/components/dashboard/pmc-legend'
+import { StatCards } from '@/components/dashboard/stat-cards'
 import { getPMCData, getPMCSummary } from '@/lib/pmc'
+import type { PMCDataPoint, PMCSummary } from '@/types/pmc'
 
 export const dynamic = 'force-dynamic'
 
-const buttonClass =
-  'inline-flex items-center justify-center rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:bg-foreground/90'
-
-function StatusBadge({ status }: { status: string }): React.ReactElement {
-  const colors: Record<string, string> = {
-    fresh: 'bg-green-500/10 text-green-600 border-green-500/20',
-    recovered: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
-    neutral: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20',
-    tired: 'bg-orange-500/10 text-orange-600 border-orange-500/20',
-    overreaching: 'bg-red-500/10 text-red-600 border-red-500/20',
-  }
-
-  return (
-    <span
-      className={`rounded-full border px-3 py-1 text-sm font-medium ${colors[status] || 'bg-muted-foreground/10 text-muted-foreground'}`}
-    >
-      {status.charAt(0).toUpperCase() + status.slice(1)}
-    </span>
-  )
+interface DashboardContentProps {
+  pmcData: PMCDataPoint[]
+  summary: PMCSummary | null
 }
 
-function TrendIndicator({ value, label }: { value: number; label: string }): React.ReactElement {
-  const isPositive = value > 0
-  const Icon = value > 0 ? TrendingUp : value < 0 ? TrendingDown : Minus
-  const color = isPositive ? 'text-green-600' : value < 0 ? 'text-red-500' : 'text-muted-foreground'
+function DashboardContent({ pmcData, summary }: DashboardContentProps): React.ReactElement {
+  const hasData = pmcData.length > 0 && summary !== null
+
+  if (!hasData) return EmptyState
 
   return (
-    <div className="flex items-center gap-1">
-      <Icon className={`size-4 ${color}`} />
-      <span className={`text-sm ${color}`}>
-        {value > 0 ? '+' : ''}
-        {value.toFixed(1)} ({label})
-      </span>
-    </div>
+    <>
+      <StatCards summary={summary} />
+      <PMCChartCard data={pmcData} />
+      <PMCLegend />
+    </>
   )
 }
 
 export default async function DashboardPage(): Promise<React.ReactElement> {
   const [pmcData, summary] = await Promise.all([getPMCData(90), getPMCSummary()])
 
-  const hasData = pmcData.length > 0 && summary !== null
-
   return (
     <div className="p-4 lg:p-6">
-      <h1 className="mb-6 text-xl font-bold">Dashboard</h1>
-
-      {!hasData ? (
-        <div className="rounded-lg border bg-muted p-8 text-center">
-          <Activity className="mx-auto mb-4 size-12 text-muted-foreground/60" />
-          <h2 className="mb-2 text-lg font-medium">No Data Yet</h2>
-          <p className="mb-4 text-sm text-muted-foreground">
-            Run `pnpm db:sync --tss` to calculate TSS and PMC for your sessions.
-          </p>
-          <Link href="/settings" className={buttonClass}>
-            Configure Settings
-          </Link>
-        </div>
-      ) : (
-        <>
-          <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-lg border bg-muted p-4">
-              <div className="mb-1 text-sm text-muted-foreground">CTL (Fitness)</div>
-              <div className="text-2xl font-bold">{summary.currentCTL.toFixed(1)}</div>
-              <TrendIndicator value={summary.trend.ctl7d} label="7d" />
-            </div>
-
-            <div className="rounded-lg border bg-muted p-4">
-              <div className="mb-1 text-sm text-muted-foreground">ATL (Fatigue)</div>
-              <div className="text-2xl font-bold">{summary.currentATL.toFixed(1)}</div>
-            </div>
-
-            <div className="rounded-lg border bg-muted p-4">
-              <div className="mb-1 text-sm text-muted-foreground">TSB (Form)</div>
-              <div className="text-2xl font-bold">{summary.currentTSB.toFixed(1)}</div>
-              <StatusBadge status={summary.fitnessStatus.status} />
-            </div>
-
-            <div className="rounded-lg border bg-muted p-4">
-              <div className="mb-1 text-sm text-muted-foreground">Weekly TSS</div>
-              <div className="text-2xl font-bold">{summary.weeklyTSS.toFixed(0)}</div>
-            </div>
-          </div>
-
-          <div className="rounded-lg border bg-muted p-4">
-            <h2 className="mb-4 text-lg font-medium">Performance Management Chart</h2>
-            <PMCChart data={pmcData} height={350} />
-          </div>
-
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
-            <div className="rounded-lg border bg-muted p-4">
-              <div className="mb-2 flex items-center gap-2">
-                <div className="size-3 rounded-full bg-blue-500" />
-                <span className="text-sm font-medium">CTL (Fitness)</span>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                42-day exponential moving average of TSS. Higher = more fit.
-              </p>
-            </div>
-
-            <div className="rounded-lg border bg-muted p-4">
-              <div className="mb-2 flex items-center gap-2">
-                <div className="size-3 rounded-full bg-magenta-500" />
-                <span className="text-sm font-medium">ATL (Fatigue)</span>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                7-day exponential moving average of TSS. Higher = more tired.
-              </p>
-            </div>
-
-            <div className="rounded-lg border bg-muted p-4">
-              <div className="mb-2 flex items-center gap-2">
-                <div className="size-3 rounded-full bg-green-500" />
-                <span className="text-sm font-medium">TSB (Form)</span>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                CTL - ATL. Positive = fresh, negative = fatigued.
-              </p>
-            </div>
-          </div>
-        </>
-      )}
+      <h1 className="mb-6 text-xl font-bold">대시보드</h1>
+      <DashboardContent pmcData={pmcData} summary={summary} />
     </div>
   )
 }

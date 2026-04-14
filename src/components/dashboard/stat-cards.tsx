@@ -1,0 +1,75 @@
+import { StatCard } from './stat-card'
+import { StatusBadge } from './status-badge'
+import { TrendIndicator } from './trend-indicator'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { getWeeklyTSSComparison } from '@/lib/pmc'
+import type { PMCSummary } from '@/types/pmc'
+
+interface StatCardsProps {
+  /** 현재 PMC 값과 7일 추세, 피트니스 상태가 포함된 요약 데이터 */
+  summary: PMCSummary
+}
+
+/**
+ * 대시보드 상단의 PMC 요약 통계 카드 그리드.
+ * CTL, ATL, TSB, 주간 TSS 네 가지 지표를 한 줄로 표시합니다.
+ */
+export function StatCards({ summary }: StatCardsProps): React.ReactElement {
+  return (
+    <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <StatCard
+        label={<TermLabel term="체력 (CTL)" definition="Chronic Training Load — 만성 훈련 부하." />}
+        value={summary.currentCTL.toFixed(1)}
+        description={
+          <TrendIndicator value={summary.trend.ctl7d} period="7일간" subject="체력 수치" />
+        }
+      />
+      <StatCard
+        label={<TermLabel term="피로 (ATL)" definition="Acute Training Load — 급성 훈련 부하. " />}
+        value={summary.currentATL.toFixed(1)}
+      />
+      <StatCard
+        label={
+          <TermLabel
+            term="폼 (TSB)"
+            definition="Training Stress Balance — 훈련 스트레스 균형. CTL - ATL."
+          />
+        }
+        value={summary.currentTSB.toFixed(1)}
+        description={summary.fitnessStatus.advice}
+      >
+        <StatusBadge fitnessStatus={summary.fitnessStatus} />
+      </StatCard>
+      <StatCard
+        label={
+          <TermLabel
+            term="주간 TSS"
+            definition="Training Stress Score — 훈련 스트레스 점수의 주간 합계. 현재 체력 수준(CTL×7) 대비 부하 비율로 해석합니다."
+          />
+        }
+        value={summary.weeklyTSS.toFixed(0)}
+        description={getWeeklyTSSComparison(summary.weeklyTSS, summary.currentCTL)}
+      />
+    </div>
+  )
+}
+
+interface TermLabelProps {
+  term: string
+  definition: string
+}
+
+function TermLabel({ term, definition }: TermLabelProps): React.ReactElement {
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <span className="cursor-help underline decoration-dotted decoration-muted-foreground/50 underline-offset-4" />
+        }
+      >
+        {term}
+      </TooltipTrigger>
+      <TooltipContent>{definition}</TooltipContent>
+    </Tooltip>
+  )
+}

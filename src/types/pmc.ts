@@ -37,6 +37,8 @@ export interface FitnessStatus {
     | 'unknown'
   label: string
   color: string
+  /** 현재 상태에 기반한 훈련 가이드 문구 */
+  advice: string
 }
 
 /** HR 기반 TSS 계산 결과 */
