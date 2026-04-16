@@ -13,7 +13,7 @@ export function SettingsForm({ settings }: SettingsFormProps): React.ReactElemen
       <div className="grid gap-6 sm:grid-cols-2">
         <div className="space-y-2">
           <label htmlFor="lthr" className="text-sm font-medium">
-            LTHR (Lactate Threshold HR)
+            젖산 역치 심박수 (LTHR)
           </label>
           <div className="flex items-center gap-2">
             <input
@@ -27,12 +27,14 @@ export function SettingsForm({ settings }: SettingsFormProps): React.ReactElemen
             />
             <span className="text-sm text-muted-foreground">bpm</span>
           </div>
-          <p className="text-xs text-muted-foreground/60">1 hour max sustainable pace HR</p>
+          <p className="text-xs text-muted-foreground/60">
+            1시간 동안 유지 가능한 최대 페이스의 심박수
+          </p>
         </div>
 
         <div className="space-y-2">
           <label htmlFor="rest_hr" className="text-sm font-medium">
-            Resting HR
+            안정 심박수
           </label>
           <div className="flex items-center gap-2">
             <input
@@ -46,12 +48,12 @@ export function SettingsForm({ settings }: SettingsFormProps): React.ReactElemen
             />
             <span className="text-sm text-muted-foreground">bpm</span>
           </div>
-          <p className="text-xs text-muted-foreground/60">Morning resting heart rate</p>
+          <p className="text-xs text-muted-foreground/60">기상 직후 안정 시 심박수</p>
         </div>
 
         <div className="space-y-2">
           <label htmlFor="max_hr" className="text-sm font-medium">
-            Max HR
+            최대 심박수
           </label>
           <div className="flex items-center gap-2">
             <input
@@ -65,12 +67,12 @@ export function SettingsForm({ settings }: SettingsFormProps): React.ReactElemen
             />
             <span className="text-sm text-muted-foreground">bpm</span>
           </div>
-          <p className="text-xs text-muted-foreground/60">Maximum heart rate</p>
+          <p className="text-xs text-muted-foreground/60">측정된 최대 심박수</p>
         </div>
 
         <div className="space-y-2">
           <label htmlFor="ftp_pace" className="text-sm font-medium">
-            FTP (Threshold Pace)
+            역치 페이스 (FTP)
           </label>
           <div className="flex items-center gap-2">
             <input
@@ -85,17 +87,17 @@ export function SettingsForm({ settings }: SettingsFormProps): React.ReactElemen
             <span className="text-sm text-muted-foreground">sec/km</span>
           </div>
           <p className="text-xs text-muted-foreground/60">
-            1 hour sustainable pace (e.g., 270 = 4:30/km)
+            1시간 유지 가능한 페이스 (예: 270 = 4:30/km)
           </p>
         </div>
       </div>
 
       {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
 
-      {state?.success && <p className="text-sm text-green-600">Settings saved successfully!</p>}
+      {state?.success && <p className="text-sm text-green">설정이 저장되었습니다.</p>}
 
       <button type="submit" disabled={isPending} className={buttonVariants({ variant: 'default' })}>
-        {isPending ? 'Saving...' : 'Save Settings'}
+        {isPending ? '저장 중...' : '설정 저장'}
       </button>
     </form>
   )

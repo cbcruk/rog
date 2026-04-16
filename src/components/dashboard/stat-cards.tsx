@@ -1,7 +1,7 @@
 import { StatCard } from './stat-card'
 import { StatusBadge } from './status-badge'
 import { TrendIndicator } from './trend-indicator'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { TermLabel } from './term-label'
 import { getWeeklyTSSComparison } from '@/lib/pmc'
 import type { PMCSummary } from '@/types/pmc'
 
@@ -51,25 +51,5 @@ export function StatCards({ summary }: StatCardsProps): React.ReactElement {
         description={getWeeklyTSSComparison(summary.weeklyTSS, summary.currentCTL)}
       />
     </div>
-  )
-}
-
-interface TermLabelProps {
-  term: string
-  definition: string
-}
-
-function TermLabel({ term, definition }: TermLabelProps): React.ReactElement {
-  return (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <span className="cursor-help underline decoration-dotted decoration-muted-foreground/50 underline-offset-4" />
-        }
-      >
-        {term}
-      </TooltipTrigger>
-      <TooltipContent>{definition}</TooltipContent>
-    </Tooltip>
   )
 }

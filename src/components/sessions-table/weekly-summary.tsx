@@ -3,7 +3,7 @@ import { formatDuration } from './sessions-table.utils'
 
 export function WeeklySummary({ group }: { group: WeekGroup }): React.ReactElement {
   return (
-    <div className="sticky top-0 z-10 bg-background pb-2 pt-3">
+    <div className="bg-background">
       <div className="flex items-baseline justify-between">
         <div className="flex items-baseline gap-2">
           <h3 className="text-lg font-semibold">{group.weekNumber}주차</h3>

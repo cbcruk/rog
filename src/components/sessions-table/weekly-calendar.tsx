@@ -37,7 +37,7 @@ export function WeeklyCalendar({ group }: { group: WeekGroup }): React.ReactElem
                   <Tooltip key={session.id}>
                     <TooltipTrigger
                       className="flex w-full items-center gap-1 text-xs tabular-nums leading-tight"
-                      render={<Link href={`/session/${session.id}`} />}
+                      render={<Link href={`/sessions/${session.id}`} />}
                     >
                       <span
                         className="inline-flex rounded-full w-2 aspect-square"

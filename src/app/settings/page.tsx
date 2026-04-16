@@ -8,29 +8,30 @@ export default async function SettingsPage(): Promise<React.ReactElement> {
 
   return (
     <div className="p-4 lg:p-6">
-      <h1 className="mb-6 text-xl font-bold">Settings</h1>
+      <h1 hidden className="mb-6 text-xl font-bold">
+        설정
+      </h1>
 
       <div className="rounded-lg border bg-muted p-6">
-        <h2 className="mb-4 text-lg font-medium">Training Zones</h2>
+        <h2 className="mb-4 text-lg font-medium">훈련 구간 설정</h2>
         <p className="mb-6 text-sm text-muted-foreground">
-          Configure your heart rate zones and threshold values for accurate TSS calculation.
+          정확한 TSS 계산을 위해 심박수 구간과 역치 값을 설정하세요.
         </p>
 
         <SettingsForm settings={settings} />
       </div>
 
       <div className="mt-6 rounded-lg border bg-muted p-6">
-        <h2 className="mb-4 text-lg font-medium">How TSS is Calculated</h2>
+        <h2 className="mb-4 text-lg font-medium">TSS 계산 방법</h2>
         <div className="space-y-3 text-sm text-muted-foreground">
           <p>
-            <strong>hrTSS</strong> = Duration (hours) x IF² x 100
+            <strong>hrTSS</strong> = 운동 시간(시) × IF² × 100
           </p>
           <p>
-            <strong>Intensity Factor (IF)</strong> = (Avg HR - Rest HR) / (LTHR - Rest HR)
+            <strong>강도 계수 (IF)</strong> = (평균 심박수 − 안정 심박수) / (LTHR − 안정 심박수)
           </p>
           <p className="text-xs">
-            TSS helps measure training load. A value of 100 represents a 1-hour workout at threshold
-            intensity.
+            TSS는 훈련 부하를 측정하는 지표입니다. 100은 역치 강도로 1시간 운동한 것에 해당합니다.
           </p>
         </div>
       </div>

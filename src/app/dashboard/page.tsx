@@ -31,7 +31,9 @@ export default async function DashboardPage(): Promise<React.ReactElement> {
 
   return (
     <div className="p-4 lg:p-6">
-      <h1 className="mb-6 text-xl font-bold">대시보드</h1>
+      <h1 hidden className="mb-6 text-xl font-bold">
+        대시보드
+      </h1>
       <DashboardContent pmcData={pmcData} summary={summary} />
     </div>
   )

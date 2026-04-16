@@ -48,7 +48,7 @@ export default async function SessionPage({
 
   return (
     <div className="p-4">
-      <Link href="/" className="text-(--blue) underline">
+      <Link href="/sessions" className="text-(--blue) underline">
         ← Back
       </Link>
 

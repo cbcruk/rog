@@ -9,9 +9,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "vp lint",
-    "analyze": "tsx lib/index.ts",
+    "sync:analyze": "tsx lib/index.ts",
     "sync": "tsx lib/sync.ts",
-    "db:sync": "tsx lib/db.ts",
+    "sync:db": "tsx lib/db.ts",
     "prepare": "vp config",
     "test": "vp test --watch"
   },

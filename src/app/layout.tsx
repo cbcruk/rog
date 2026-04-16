@@ -1,10 +1,13 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import { Noto_Sans_KR } from 'next/font/google'
-import type { RootLayoutProps } from './layout.types'
 import { cn } from '@/lib/utils'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { MainLayout } from '@/components/layout/main-layout'
+
+interface RootLayoutProps {
+  children: React.ReactNode
+}
 
 const notoSans = Noto_Sans_KR({
   weight: ['400', '500', '900'],

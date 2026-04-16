@@ -11,9 +11,9 @@ export function SessionsTable({ sessions }: SessionsTableProps): React.ReactElem
   const weekGroups = useMemo(() => groupSessionsByWeek(sessions), [sessions])
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       {weekGroups.map((group) => (
-        <div key={group.week}>
+        <div key={group.week} className="flex flex-col gap-4">
           <WeeklySummary group={group} />
           <WeeklyCalendar group={group} />
           <WeeklyFlowChart group={group} />

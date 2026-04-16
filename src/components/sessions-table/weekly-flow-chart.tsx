@@ -23,7 +23,7 @@ export function WeeklyFlowChart({ group }: { group: WeekGroup }): React.ReactEle
   const maxDistance = Math.max(...data.map((d) => d.distance))
 
   return (
-    <div className="mt-3 rounded-lg border bg-muted p-3">
+    <div className="rounded-lg border bg-muted p-3">
       <ResponsiveContainer width="100%" height={120}>
         <ComposedChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
           <XAxis dataKey="day" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
