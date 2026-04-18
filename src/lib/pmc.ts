@@ -6,6 +6,7 @@ import type {
   FitnessStatus,
   WeeklyZoneStats,
 } from '@/types/pmc'
+import type { RecommendationInput } from '@/lib/recommendations'
 
 function createDbClient(): ReturnType<typeof createClient> {
   const dbUrl = process.env.TURSO_DATABASE_URL
@@ -179,6 +180,42 @@ export async function getWeeklyZoneStats(): Promise<WeeklyZoneStats | null> {
     easyPct: Math.round((easy / total) * 100),
     hardPct: Math.round((hard / total) * 100),
     totalSeconds: total,
+  }
+}
+
+/** 추천 엔진에 필요한 입력 데이터를 수집한다. */
+export async function getRecommendationInput(
+  tsb: number,
+  zoneStats: WeeklyZoneStats | null,
+): Promise<RecommendationInput> {
+  const db = createDbClient()
+
+  const weekAgo = new Date()
+  weekAgo.setDate(weekAgo.getDate() - 7)
+  const fourWeeksAgo = new Date()
+  fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28)
+
+  const [weeklyResult, fourWeekResult] = await Promise.all([
+    db.execute({
+      sql: `SELECT COALESCE(SUM(distance), 0) as dist FROM sessions WHERE date >= ?`,
+      args: [weekAgo.toISOString().split('T')[0]],
+    }),
+    db.execute({
+      sql: `SELECT COALESCE(SUM(distance), 0) as dist FROM sessions WHERE date >= ?`,
+      args: [fourWeeksAgo.toISOString().split('T')[0]],
+    }),
+  ])
+
+  const weeklyDistance = Number(weeklyResult.rows[0].dist)
+  const fourWeekTotalDistance = Number(fourWeekResult.rows[0].dist)
+  const fourWeekAvgDistance = fourWeekTotalDistance / 4
+
+  return {
+    tsb,
+    weeklyZ4Seconds: zoneStats?.z4Seconds ?? 0,
+    weeklyZ5Seconds: zoneStats?.z5Seconds ?? 0,
+    weeklyDistance,
+    fourWeekAvgDistance,
   }
 }
 
