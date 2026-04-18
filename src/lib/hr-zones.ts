@@ -64,3 +64,30 @@ export function calculateZoneDistribution(heartRates: number[], lthr: number): Z
     z5: toZoneTime(counts.z5),
   }
 }
+
+export interface BakkenZones {
+  easy: ZoneTime
+  threshold: ZoneTime
+  supra: ZoneTime
+}
+
+/**
+ * Friel 5-Zone 분포를 Bakken 3-Zone으로 매핑한다.
+ * - Easy (Z1): Friel Z1+Z2+Z3 (LTHR 94% 미만)
+ * - Threshold (Z2): Friel Z4 (LTHR 94~100%)
+ * - Supra (Z3): Friel Z5 (LTHR 100% 초과)
+ */
+export function toBakkenZones(dist: ZoneDistribution): BakkenZones {
+  const total =
+    dist.z1.seconds + dist.z2.seconds + dist.z3.seconds + dist.z4.seconds + dist.z5.seconds
+
+  function merge(seconds: number): ZoneTime {
+    return { seconds, pct: total > 0 ? Math.round((seconds / total) * 100) : 0 }
+  }
+
+  return {
+    easy: merge(dist.z1.seconds + dist.z2.seconds + dist.z3.seconds),
+    threshold: merge(dist.z4.seconds),
+    supra: merge(dist.z5.seconds),
+  }
+}

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getSession, getAllSessionIds } from '@/lib/sessions'
-import { getZone } from '@/lib/hr-zones'
+import { getZone, toBakkenZones } from '@/lib/hr-zones'
 import { getSettings } from '@/lib/settings'
 import { getLatestLT2ForEnvironment } from '@/../lib/db'
 import { detectEnvironment, compareLT2, formatPaceFromSeconds } from '@/lib/lt2-comparison'
@@ -327,6 +327,25 @@ export default async function SessionPage({
               ))}
             </tbody>
           </table>
+          <div className="mt-4">
+            <h3 className="mb-2 text-sm font-medium text-muted-foreground">Bakken 3-Zone 요약</h3>
+            {(() => {
+              const b = toBakkenZones(session.zoneDistribution)
+              return (
+                <div className="flex gap-4 text-sm">
+                  <span>
+                    이지 <strong>{b.easy.pct}%</strong>
+                  </span>
+                  <span>
+                    역치 <strong className="text-orange">{b.threshold.pct}%</strong>
+                  </span>
+                  <span>
+                    수프라 <strong className="text-red">{b.supra.pct}%</strong>
+                  </span>
+                </div>
+              )
+            })()}
+          </div>
         </section>
       )}
 

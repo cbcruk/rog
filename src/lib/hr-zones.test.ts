@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vite-plus/test'
-import { getZone, getZoneBoundaries, calculateZoneDistribution } from './hr-zones'
+import { getZone, getZoneBoundaries, calculateZoneDistribution, toBakkenZones } from './hr-zones'
+import type { ZoneDistribution } from './hr-zones'
 
 describe('getZoneBoundaries', () => {
   it('LTHR 165 기준으로 올바른 경계값을 반환한다', () => {
@@ -63,5 +64,24 @@ describe('calculateZoneDistribution', () => {
     const dist = calculateZoneDistribution([], 165)
     expect(dist.z1.seconds).toBe(0)
     expect(dist.z1.pct).toBe(0)
+  })
+})
+
+describe('toBakkenZones', () => {
+  it('Friel Z1+Z2+Z3 → Easy, Z4 → Threshold, Z5 → Supra', () => {
+    const dist: ZoneDistribution = {
+      z1: { seconds: 100, pct: 20 },
+      z2: { seconds: 150, pct: 30 },
+      z3: { seconds: 50, pct: 10 },
+      z4: { seconds: 150, pct: 30 },
+      z5: { seconds: 50, pct: 10 },
+    }
+    const bakken = toBakkenZones(dist)
+    expect(bakken.easy.seconds).toBe(300)
+    expect(bakken.easy.pct).toBe(60)
+    expect(bakken.threshold.seconds).toBe(150)
+    expect(bakken.threshold.pct).toBe(30)
+    expect(bakken.supra.seconds).toBe(50)
+    expect(bakken.supra.pct).toBe(10)
   })
 })
