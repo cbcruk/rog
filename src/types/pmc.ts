@@ -86,6 +86,20 @@ export interface PMCChartProps {
   days?: number
 }
 
+/** 주간 HR Zone 시간 집계 */
+export interface WeeklyZoneStats {
+  /** Z4(역치) 총 시간(초) */
+  z4Seconds: number
+  /** Z5(VO2max) 총 시간(초) */
+  z5Seconds: number
+  /** 이지 비율(Z1+Z2) % */
+  easyPct: number
+  /** 하드 비율(Z3+Z4+Z5) % */
+  hardPct: number
+  /** 총 훈련 시간(초) */
+  totalSeconds: number
+}
+
 /** 대시보드 PMC 요약 */
 export interface PMCSummary {
   currentCTL: number

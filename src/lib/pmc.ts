@@ -1,5 +1,11 @@
 import { createClient } from '@libsql/client'
-import type { PMCDataPoint, PMCSummary, DailyMetrics, FitnessStatus } from '@/types/pmc'
+import type {
+  PMCDataPoint,
+  PMCSummary,
+  DailyMetrics,
+  FitnessStatus,
+  WeeklyZoneStats,
+} from '@/types/pmc'
 
 function createDbClient(): ReturnType<typeof createClient> {
   const dbUrl = process.env.TURSO_DATABASE_URL
@@ -127,6 +133,53 @@ export function getWeeklyTSSComparison(weeklyTSS: number, currentCTL: number): s
   if (ratio < 1.2) return `체력 유지 수준 (${percent >= 0 ? '+' : ''}${percent}%)`
   if (ratio < 1.5) return `체력 증가 구간 (+${percent}%) — 안정적으로 부하를 늘리는 중`
   return `급격한 부하 증가 (+${percent}%) — 부상·오버트레이닝 위험`
+}
+
+/** 최근 7일간 세션의 HR Zone 시간 집계를 반환한다. */
+export async function getWeeklyZoneStats(): Promise<WeeklyZoneStats | null> {
+  const db = createDbClient()
+
+  const weekAgo = new Date()
+  weekAgo.setDate(weekAgo.getDate() - 7)
+  const weekAgoStr = weekAgo.toISOString().split('T')[0]
+
+  const result = await db.execute({
+    sql: `
+      SELECT
+        COALESCE(SUM(z1_seconds), 0) as z1,
+        COALESCE(SUM(z2_seconds), 0) as z2,
+        COALESCE(SUM(z3_seconds), 0) as z3,
+        COALESCE(SUM(z4_seconds), 0) as z4,
+        COALESCE(SUM(z5_seconds), 0) as z5
+      FROM sessions
+      WHERE date >= ?
+        AND z1_seconds IS NOT NULL
+    `,
+    args: [weekAgoStr],
+  })
+
+  if (result.rows.length === 0) return null
+
+  const row = result.rows[0]
+  const z1 = Number(row.z1)
+  const z2 = Number(row.z2)
+  const z3 = Number(row.z3)
+  const z4 = Number(row.z4)
+  const z5 = Number(row.z5)
+  const total = z1 + z2 + z3 + z4 + z5
+
+  if (total === 0) return null
+
+  const easy = z1 + z2
+  const hard = z3 + z4 + z5
+
+  return {
+    z4Seconds: z4,
+    z5Seconds: z5,
+    easyPct: Math.round((easy / total) * 100),
+    hardPct: Math.round((hard / total) * 100),
+    totalSeconds: total,
+  }
 }
 
 /** 대시보드용 PMC 요약을 반환한다. 현재 CTL/ATL/TSB, 주간 TSS, 컨디션 상태, 7일/28일 CTL 추세를 포함한다. */
