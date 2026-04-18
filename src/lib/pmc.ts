@@ -120,20 +120,19 @@ export function getFitnessStatus(tsb: number | null): FitnessStatus {
 }
 
 /**
- * 주간 TSS를 현재 체력 유지에 필요한 부하(CTL × 7)와 비교해 해석한다.
- * 절대값이 아니라 개인 체력 수준 대비 상대적 부하를 표현한다.
+ * ACWR(Acute:Chronic Workload Ratio, Gabbett 2016)을 계산하고 한국어로 해석한다.
+ * ACWR = 주간 TSS / (CTL × 7). 스포츠 의학에서 가장 널리 쓰이는 부상 예측 지표.
  */
 export function getWeeklyTSSComparison(weeklyTSS: number, currentCTL: number): string {
-  if (currentCTL <= 0) return '체력 데이터 부족 — 기준 비교 불가'
+  if (currentCTL <= 0) return '체력 데이터 부족 — ACWR 계산 불가'
 
-  const maintenance = currentCTL * 7
-  const ratio = weeklyTSS / maintenance
-  const percent = Math.round((ratio - 1) * 100)
+  const acwr = weeklyTSS / (currentCTL * 7)
+  const label = `ACWR ${acwr.toFixed(2)}`
 
-  if (ratio < 0.8) return `체력 유지 수준보다 ${-percent}% 낮음 — 체력이 감소할 수 있습니다`
-  if (ratio < 1.2) return `체력 유지 수준 (${percent >= 0 ? '+' : ''}${percent}%)`
-  if (ratio < 1.5) return `체력 증가 구간 (+${percent}%) — 안정적으로 부하를 늘리는 중`
-  return `급격한 부하 증가 (+${percent}%) — 부상·오버트레이닝 위험`
+  if (acwr < 0.8) return `${label} — 디트레이닝 구간. 부하가 너무 낮습니다`
+  if (acwr <= 1.3) return `${label} — 안전 구간 (sweet spot)`
+  if (acwr <= 1.5) return `${label} — 주의. 부상 위험이 증가하는 구간`
+  return `${label} — 위험. 급격한 부하 증가로 부상 위험이 높습니다`
 }
 
 /** 최근 7일간 세션의 HR Zone 시간 집계를 반환한다. */

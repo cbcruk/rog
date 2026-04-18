@@ -44,7 +44,7 @@ export function StatCards({ summary }: StatCardsProps): React.ReactElement {
         label={
           <TermLabel
             term="주간 TSS"
-            definition="Training Stress Score — 훈련 스트레스 점수의 주간 합계. 현재 체력 수준(CTL×7) 대비 부하 비율로 해석합니다."
+            definition="Training Stress Score — 훈련 스트레스 점수의 주간 합계. ACWR(Gabbett 2016) 기준으로 부상 위험을 평가합니다. 0.8~1.3이 안전 구간."
           />
         }
         value={summary.weeklyTSS.toFixed(0)}
