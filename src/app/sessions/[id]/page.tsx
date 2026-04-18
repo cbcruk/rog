@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import { getSession, getAllSessionIds } from '@/lib/sessions'
 import { getZone } from '@/lib/hr-zones'
 import { getSettings } from '@/lib/settings'
+import { getLatestLT2ForEnvironment } from '@/../lib/db'
+import { detectEnvironment, compareLT2, formatPaceFromSeconds } from '@/lib/lt2-comparison'
 
 export async function generateStaticParams(): Promise<{ id: string }[]> {
   const ids = getAllSessionIds()
@@ -41,6 +43,10 @@ export default async function SessionPage({
 
   const showElevation = session.elevation.totalAscent > 0
   const lthr = settings.lthr
+
+  const env = detectEnvironment(session.metadata)
+  const lt2Benchmark = env ? await getLatestLT2ForEnvironment(env) : null
+  const lt2Comparison = lt2Benchmark ? compareLT2(session.summary.avgPace, lt2Benchmark) : null
 
   return (
     <div className="p-4">
@@ -109,6 +115,46 @@ export default async function SessionPage({
           </tbody>
         </table>
       </section>
+
+      {/* LT2 Comparison */}
+      {lt2Comparison && (
+        <section className="mt-6">
+          <h2 className="mb-2 text-lg font-semibold">LT2 페이스 비교</h2>
+          <table className="w-full border-collapse text-sm">
+            <tbody>
+              <tr className="border-b">
+                <td className="p-2 text-muted-foreground">환경</td>
+                <td className="p-2 text-right">{lt2Benchmark!.environment}</td>
+              </tr>
+              <tr className="border-b">
+                <td className="p-2 text-muted-foreground">LT2 기준</td>
+                <td className="p-2 text-right tabular-nums">
+                  {formatPaceFromSeconds(lt2Comparison.benchmarkPace)}/km
+                </td>
+              </tr>
+              <tr className="border-b">
+                <td className="p-2 text-muted-foreground">실제 평균</td>
+                <td className="p-2 text-right tabular-nums">
+                  {formatPaceFromSeconds(lt2Comparison.actualPace)}/km
+                </td>
+              </tr>
+              <tr className="border-b">
+                <td className="p-2 text-muted-foreground">차이</td>
+                <td
+                  className={`p-2 text-right tabular-nums ${lt2Comparison.improved ? 'text-green' : 'text-red'}`}
+                >
+                  {lt2Comparison.improved ? '' : '+'}
+                  {-lt2Comparison.diffSeconds}초{lt2Comparison.improved ? ' (개선)' : ' (저하)'}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p className="mt-2 text-xs text-muted-foreground">
+            기준일: {lt2Benchmark!.date}
+            {lt2Benchmark!.notes ? ` · ${lt2Benchmark!.notes}` : ''}
+          </p>
+        </section>
+      )}
 
       {/* Laps */}
       {session.laps.length > 0 && (

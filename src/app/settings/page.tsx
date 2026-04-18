@@ -1,10 +1,12 @@
 import { SettingsForm } from '@/components/settings-form/settings-form'
+import { LT2Benchmarks } from '@/components/settings-form/lt2-benchmarks'
 import { getSettings } from '@/lib/settings'
+import { getLT2Benchmarks } from '@/../lib/db'
 
 export const dynamic = 'force-dynamic'
 
 export default async function SettingsPage(): Promise<React.ReactElement> {
-  const settings = await getSettings()
+  const [settings, benchmarks] = await Promise.all([getSettings(), getLT2Benchmarks()])
 
   return (
     <div className="p-4 lg:p-6">
@@ -19,6 +21,14 @@ export default async function SettingsPage(): Promise<React.ReactElement> {
         </p>
 
         <SettingsForm settings={settings} />
+      </div>
+
+      <div className="mt-6 rounded-lg border bg-muted p-6">
+        <h2 className="mb-4 text-lg font-medium">환경별 LT2 페이스</h2>
+        <p className="mb-6 text-sm text-muted-foreground">
+          환경별 역치 페이스를 기록하면 세션 분석에서 실제 페이스와 비교합니다.
+        </p>
+        <LT2Benchmarks benchmarks={benchmarks} />
       </div>
 
       <div className="mt-6 rounded-lg border bg-muted p-6">

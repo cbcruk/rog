@@ -113,6 +113,17 @@ export async function initDb(): Promise<void> {
     )
   `)
 
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS lt2_benchmarks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      environment TEXT NOT NULL,
+      pace_seconds INTEGER NOT NULL,
+      date TEXT NOT NULL,
+      notes TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+  `)
+
   await initDefaultSettings()
 }
 
@@ -280,6 +291,61 @@ export async function getSessionMeta(id: string): Promise<SessionMetaUpdate | nu
     rpe: row.rpe as number | null,
     sleepQuality: row.sleep_quality as string | null,
     fatigueLevel: row.fatigue_level as string | null,
+    notes: row.notes as string | null,
+  }
+}
+
+export interface LT2Benchmark {
+  id: number
+  environment: string
+  paceSeconds: number
+  date: string
+  notes: string | null
+}
+
+export async function getLT2Benchmarks(): Promise<LT2Benchmark[]> {
+  const result = await db.execute(
+    `SELECT id, environment, pace_seconds, date, notes FROM lt2_benchmarks ORDER BY date DESC`,
+  )
+  return result.rows.map((row) => ({
+    id: row.id as number,
+    environment: row.environment as string,
+    paceSeconds: row.pace_seconds as number,
+    date: row.date as string,
+    notes: row.notes as string | null,
+  }))
+}
+
+export async function addLT2Benchmark(
+  environment: string,
+  paceSeconds: number,
+  date: string,
+  notes?: string,
+): Promise<void> {
+  await db.execute({
+    sql: `INSERT INTO lt2_benchmarks (environment, pace_seconds, date, notes) VALUES (?, ?, ?, ?)`,
+    args: [environment, paceSeconds, date, notes ?? null],
+  })
+}
+
+export async function deleteLT2Benchmark(id: number): Promise<void> {
+  await db.execute({ sql: `DELETE FROM lt2_benchmarks WHERE id = ?`, args: [id] })
+}
+
+export async function getLatestLT2ForEnvironment(
+  environment: string,
+): Promise<LT2Benchmark | null> {
+  const result = await db.execute({
+    sql: `SELECT id, environment, pace_seconds, date, notes FROM lt2_benchmarks WHERE environment = ? ORDER BY date DESC LIMIT 1`,
+    args: [environment],
+  })
+  if (result.rows.length === 0) return null
+  const row = result.rows[0]
+  return {
+    id: row.id as number,
+    environment: row.environment as string,
+    paceSeconds: row.pace_seconds as number,
+    date: row.date as string,
     notes: row.notes as string | null,
   }
 }
