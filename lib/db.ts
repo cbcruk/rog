@@ -52,6 +52,12 @@ export async function initDb(): Promise<void> {
       z5_seconds INTEGER,
       rtss REAL,
       intensity_factor REAL,
+      session_type TEXT,
+      intent TEXT,
+      rpe INTEGER,
+      sleep_quality TEXT,
+      fatigue_level TEXT,
+      notes TEXT,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
   `)
@@ -83,6 +89,21 @@ export async function initDb(): Promise<void> {
   for (const col of newZoneColumns) {
     const type = col.endsWith('_pct') ? 'REAL' : 'INTEGER'
     await db.execute(`ALTER TABLE sessions ADD COLUMN ${col} ${type}`).catch(() => {})
+  }
+
+  const metaColumns = [
+    'session_type TEXT',
+    'intent TEXT',
+    'rpe INTEGER',
+    'sleep_quality TEXT',
+    'fatigue_level TEXT',
+    'notes TEXT',
+  ]
+  for (const colDef of metaColumns) {
+    const col = colDef.split(' ')[0]
+    await db
+      .execute(`ALTER TABLE sessions ADD COLUMN ${col} ${colDef.split(' ').slice(1).join(' ')}`)
+      .catch(() => {})
   }
 
   await db.execute(`
@@ -213,6 +234,54 @@ export async function upsertSession(analysis: AnalysisInput): Promise<void> {
       analysis.zoneDistribution?.z5.seconds ?? null,
     ],
   })
+}
+
+export interface SessionMetaUpdate {
+  sessionType?: string | null
+  intent?: string | null
+  rpe?: number | null
+  sleepQuality?: string | null
+  fatigueLevel?: string | null
+  notes?: string | null
+}
+
+/** 세션의 메타데이터 필드만 업데이트한다. */
+export async function updateSessionMeta(id: string, meta: SessionMetaUpdate): Promise<void> {
+  await db.execute({
+    sql: `
+      UPDATE sessions SET
+        session_type = ?, intent = ?, rpe = ?,
+        sleep_quality = ?, fatigue_level = ?, notes = ?
+      WHERE id = ?
+    `,
+    args: [
+      meta.sessionType ?? null,
+      meta.intent ?? null,
+      meta.rpe ?? null,
+      meta.sleepQuality ?? null,
+      meta.fatigueLevel ?? null,
+      meta.notes ?? null,
+      id,
+    ],
+  })
+}
+
+/** 세션의 메타데이터 필드를 조회한다. */
+export async function getSessionMeta(id: string): Promise<SessionMetaUpdate | null> {
+  const result = await db.execute({
+    sql: `SELECT session_type, intent, rpe, sleep_quality, fatigue_level, notes FROM sessions WHERE id = ?`,
+    args: [id],
+  })
+  if (result.rows.length === 0) return null
+  const row = result.rows[0]
+  return {
+    sessionType: row.session_type as string | null,
+    intent: row.intent as string | null,
+    rpe: row.rpe as number | null,
+    sleepQuality: row.sleep_quality as string | null,
+    fatigueLevel: row.fatigue_level as string | null,
+    notes: row.notes as string | null,
+  }
 }
 
 interface SyncOptions {

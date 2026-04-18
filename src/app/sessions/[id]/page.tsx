@@ -44,9 +44,17 @@ export default async function SessionPage({
 
   return (
     <div className="p-4">
-      <Link href="/sessions" className="text-(--blue) underline">
-        ← Back
-      </Link>
+      <div className="flex items-center justify-between">
+        <Link href="/sessions" className="text-blue underline">
+          ← Back
+        </Link>
+        <Link
+          href={`/sessions/${id}/edit`}
+          className="text-sm text-muted-foreground hover:text-foreground"
+        >
+          메타데이터 편집
+        </Link>
+      </div>
 
       <h1 className="mt-4 text-2xl font-bold">
         {session.summary.distance}km {session.metadata?.type || 'Run'}
