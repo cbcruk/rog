@@ -151,6 +151,12 @@ function analyzeIntervals(
                 restHRs.reduce((a, b) => a + b, 0) / restHRs.length,
             )
           : null,
+      hrDriftAcrossSets:
+        intervals.length >= 2 &&
+        intervals[0].work.avgHR != null &&
+        intervals[intervals.length - 1].work.avgHR != null
+          ? intervals[intervals.length - 1].work.avgHR! - intervals[0].work.avgHR!
+          : null,
     },
     sets: intervals,
   }

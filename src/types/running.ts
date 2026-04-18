@@ -304,6 +304,8 @@ export interface IntervalAnalysis {
     avgRestHR: number | null
     /** 운동-회복 심박 회복량 (bpm) */
     hrRecovery: number | null
+    /** 첫 세트 vs 마지막 세트 운동 구간 심박 차이 (bpm). 양수면 세트가 진행될수록 심박 상승. */
+    hrDriftAcrossSets: number | null
   }
   sets: IntervalSet[]
 }

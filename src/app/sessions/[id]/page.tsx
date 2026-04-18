@@ -409,6 +409,18 @@ export default async function SessionPage({
                     : '-'}
                 </td>
               </tr>
+              {session.intervals.summary.hrDriftAcrossSets != null && (
+                <tr className="border-b">
+                  <td className="p-2 text-muted-foreground">세트간 HR 드리프트</td>
+                  <td
+                    className={`p-2 text-right ${session.intervals.summary.hrDriftAcrossSets > 5 ? 'text-orange' : 'text-muted-foreground'}`}
+                  >
+                    {session.intervals.summary.hrDriftAcrossSets > 0 ? '+' : ''}
+                    {session.intervals.summary.hrDriftAcrossSets} bpm
+                    {session.intervals.summary.hrDriftAcrossSets > 5 ? ' (주의)' : ''}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </section>
