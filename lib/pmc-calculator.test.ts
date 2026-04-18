@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vite-plus/test'
-import { calculatePMC, getFitnessStatus, getFitnessTrend } from './pmc-calculator'
+import { calculatePMC, getFitnessTrend } from './pmc-calculator'
 
 describe('calculatePMC', () => {
   it('세션 데이터로 CTL, ATL, TSB를 일별 계산한다', () => {
@@ -76,38 +76,6 @@ describe('calculatePMC', () => {
     const day1 = pmc.find((d) => d.date === '2026-03-01')
 
     expect(day1!.tss).toBe(0)
-  })
-})
-
-describe('getFitnessStatus', () => {
-  it('TSB > 25이면 fresh로 분류한다', () => {
-    expect(getFitnessStatus(30).status).toBe('fresh')
-  })
-
-  it('TSB 5~25이면 recovered로 분류한다', () => {
-    expect(getFitnessStatus(15).status).toBe('recovered')
-  })
-
-  it('TSB -10~5이면 neutral로 분류한다', () => {
-    expect(getFitnessStatus(0).status).toBe('neutral')
-  })
-
-  it('TSB -30~-10이면 tired로 분류한다', () => {
-    expect(getFitnessStatus(-20).status).toBe('tired')
-  })
-
-  it('TSB < -30이면 overreaching으로 분류한다', () => {
-    expect(getFitnessStatus(-35).status).toBe('overreaching')
-  })
-
-  it('null이면 unknown을 반환한다', () => {
-    expect(getFitnessStatus(null).status).toBe('unknown')
-  })
-
-  it('각 상태에 label과 color를 포함한다', () => {
-    const status = getFitnessStatus(30)
-    expect(status.label).toBe('Fresh')
-    expect(status.color).toBe('green')
   })
 })
 

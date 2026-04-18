@@ -52,7 +52,7 @@ export default async function SessionPage({
     <div className="p-4">
       <div className="flex items-center justify-between">
         <Link href="/sessions" className="text-blue underline">
-          ← Back
+          ← 돌아가기
         </Link>
         <Link
           href={`/sessions/${id}/edit`}
@@ -69,44 +69,44 @@ export default async function SessionPage({
         {formatDate(session.date)} · {formatTime(session.startTime)}
       </p>
 
-      {/* Summary */}
+      {/* 요약 */}
       <section className="mt-6">
-        <h2 className="mb-2 text-lg font-semibold">Summary</h2>
+        <h2 className="mb-2 text-lg font-semibold">요약</h2>
         <table className="w-full border-collapse text-sm">
           <tbody>
             <tr className="border-b">
-              <td className="p-2 text-muted-foreground">Distance</td>
+              <td className="p-2 text-muted-foreground">거리</td>
               <td className="p-2 text-right">{session.summary.distance} km</td>
             </tr>
             <tr className="border-b">
-              <td className="p-2 text-muted-foreground">Duration</td>
+              <td className="p-2 text-muted-foreground">시간</td>
               <td className="p-2 text-right">{session.summary.duration}</td>
             </tr>
             <tr className="border-b">
-              <td className="p-2 text-muted-foreground">Avg Pace</td>
+              <td className="p-2 text-muted-foreground">평균 페이스</td>
               <td className="p-2 text-right">{session.summary.avgPace} /km</td>
             </tr>
             <tr className="border-b">
-              <td className="p-2 text-muted-foreground">Avg HR / Max HR</td>
-              <td className="p-2 text-right text-(--red)">
+              <td className="p-2 text-muted-foreground">평균 / 최대 심박</td>
+              <td className="p-2 text-right text-red">
                 {session.summary.avgHeartRate} / {session.summary.maxHeartRate} bpm
               </td>
             </tr>
             {session.summary.avgCadence && (
               <tr className="border-b">
-                <td className="p-2 text-muted-foreground">Cadence</td>
+                <td className="p-2 text-muted-foreground">케이던스</td>
                 <td className="p-2 text-right">{session.summary.avgCadence} spm</td>
               </tr>
             )}
             {session.summary.calories && (
               <tr className="border-b">
-                <td className="p-2 text-muted-foreground">Calories</td>
+                <td className="p-2 text-muted-foreground">칼로리</td>
                 <td className="p-2 text-right">{session.summary.calories} kcal</td>
               </tr>
             )}
             {showElevation && (
               <tr className="border-b">
-                <td className="p-2 text-muted-foreground">Elevation</td>
+                <td className="p-2 text-muted-foreground">고도</td>
                 <td className="p-2 text-right">
                   +{session.elevation.totalAscent}m / -{session.elevation.totalDescent}m
                 </td>
@@ -159,19 +159,19 @@ export default async function SessionPage({
       {/* Laps */}
       {session.laps.length > 0 && (
         <section className="mt-6">
-          <h2 className="mb-2 text-lg font-semibold">Laps</h2>
+          <h2 className="mb-2 text-lg font-semibold">랩</h2>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="border-b">
                   <th className="p-2 text-left text-muted-foreground">km</th>
-                  <th className="p-2 text-right text-muted-foreground">Pace</th>
+                  <th className="p-2 text-right text-muted-foreground">페이스</th>
                   <th className="p-2 text-right text-muted-foreground">HR</th>
-                  <th className="p-2 text-right text-muted-foreground">Zone</th>
+                  <th className="p-2 text-right text-muted-foreground">존</th>
                   {session.laps[0].cadence && (
-                    <th className="p-2 text-right text-muted-foreground">Cadence</th>
+                    <th className="p-2 text-right text-muted-foreground">케이던스</th>
                   )}
-                  {showElevation && <th className="p-2 text-right text-muted-foreground">Elev</th>}
+                  {showElevation && <th className="p-2 text-right text-muted-foreground">고도</th>}
                 </tr>
               </thead>
               <tbody>
@@ -179,7 +179,7 @@ export default async function SessionPage({
                   <tr key={lap.km} className="border-b">
                     <td className="p-2">{lap.km}</td>
                     <td className="p-2 text-right">{lap.paceFormatted}</td>
-                    <td className="p-2 text-right text-(--red)">{lap.heartRate}</td>
+                    <td className="p-2 text-right text-red">{lap.heartRate}</td>
                     <td className="p-2 text-right text-muted-foreground">
                       Z{getZone(lap.heartRate, lthr)}
                     </td>
@@ -197,50 +197,46 @@ export default async function SessionPage({
         </section>
       )}
 
-      {/* Splits & Consistency */}
+      {/* 스플릿 & 일관성 */}
       <section className="mt-6">
-        <h2 className="mb-2 text-lg font-semibold">Splits & Consistency</h2>
+        <h2 className="mb-2 text-lg font-semibold">스플릿 & 일관성</h2>
         <table className="w-full border-collapse text-sm">
           <tbody>
             <tr className="border-b">
-              <td className="p-2 text-muted-foreground">1st Half Pace</td>
+              <td className="p-2 text-muted-foreground">전반 페이스</td>
               <td className="p-2 text-right">{session.splits.firstHalfPace}</td>
             </tr>
             <tr className="border-b">
-              <td className="p-2 text-muted-foreground">2nd Half Pace</td>
+              <td className="p-2 text-muted-foreground">후반 페이스</td>
               <td className="p-2 text-right">{session.splits.secondHalfPace}</td>
             </tr>
             <tr className="border-b">
-              <td className="p-2 text-muted-foreground">Split Type</td>
+              <td className="p-2 text-muted-foreground">스플릿 유형</td>
               <td className="p-2 text-right">
-                <span
-                  className={
-                    session.splits.type === 'negative' ? 'text-(--green)' : 'text-(--orange)'
-                  }
-                >
+                <span className={session.splits.type === 'negative' ? 'text-green' : 'text-orange'}>
                   {session.splits.type} ({session.splits.type === 'negative' ? '' : '+'}
                   {session.splits.diffSeconds}s)
                 </span>
               </td>
             </tr>
             <tr className="border-b">
-              <td className="p-2 text-muted-foreground">CV</td>
+              <td className="p-2 text-muted-foreground">변동계수 (CV)</td>
               <td className="p-2 text-right">{session.consistency.cv}%</td>
             </tr>
             <tr className="border-b">
-              <td className="p-2 text-muted-foreground">Std Dev</td>
+              <td className="p-2 text-muted-foreground">표준편차</td>
               <td className="p-2 text-right">{session.consistency.stdDevSeconds}s</td>
             </tr>
             <tr className="border-b">
-              <td className="p-2 text-muted-foreground">Rating</td>
+              <td className="p-2 text-muted-foreground">평가</td>
               <td className="p-2 text-right">
                 <span
                   className={
                     session.consistency.rating === 'excellent'
-                      ? 'text-(--green)'
+                      ? 'text-green'
                       : session.consistency.rating === 'good'
-                        ? 'text-(--cyan)'
-                        : 'text-(--orange)'
+                        ? 'text-cyan'
+                        : 'text-orange'
                   }
                 >
                   {session.consistency.rating}
@@ -254,25 +250,23 @@ export default async function SessionPage({
       {/* Heart Rate */}
       {session.heartRate && (
         <section className="mt-6">
-          <h2 className="mb-2 text-lg font-semibold">Heart Rate</h2>
+          <h2 className="mb-2 text-lg font-semibold">심박수</h2>
           <table className="w-full border-collapse text-sm">
             <tbody>
               <tr className="border-b">
-                <td className="p-2 text-muted-foreground">Avg</td>
-                <td className="p-2 text-right text-(--red)">
-                  {session.heartRate.avgHeartRate} bpm
-                </td>
+                <td className="p-2 text-muted-foreground">평균</td>
+                <td className="p-2 text-right text-red">{session.heartRate.avgHeartRate} bpm</td>
               </tr>
               <tr className="border-b">
-                <td className="p-2 text-muted-foreground">Min</td>
+                <td className="p-2 text-muted-foreground">최저</td>
                 <td className="p-2 text-right">{session.heartRate.minHeartRate} bpm</td>
               </tr>
               <tr className="border-b">
-                <td className="p-2 text-muted-foreground">Max</td>
+                <td className="p-2 text-muted-foreground">최대</td>
                 <td className="p-2 text-right">{session.heartRate.maxHeartRate} bpm</td>
               </tr>
               <tr className="border-b">
-                <td className="p-2 text-muted-foreground">Drift</td>
+                <td className="p-2 text-muted-foreground">드리프트</td>
                 <td className="p-2 text-right">
                   {session.heartRate.drift > 0 ? '+' : ''}
                   {session.heartRate.drift}%
@@ -286,7 +280,7 @@ export default async function SessionPage({
       {/* Zone Distribution */}
       {session.zoneDistribution && (
         <section className="mt-6">
-          <h2 className="mb-2 text-lg font-semibold">HR Zone Distribution</h2>
+          <h2 className="mb-2 text-lg font-semibold">HR 존 분포</h2>
           <div className="mb-3 flex h-4 overflow-hidden rounded-full">
             {[
               { zone: session.zoneDistribution.z1, color: 'bg-blue/60', label: 'Z1' },
@@ -310,7 +304,7 @@ export default async function SessionPage({
           <table className="w-full border-collapse text-sm">
             <thead>
               <tr className="border-b">
-                <th className="p-2 text-left text-muted-foreground">Zone</th>
+                <th className="p-2 text-left text-muted-foreground">존</th>
                 <th className="p-2 text-right text-muted-foreground">시간</th>
                 <th className="p-2 text-right text-muted-foreground">비율</th>
               </tr>
@@ -385,30 +379,30 @@ export default async function SessionPage({
       {/* Intervals */}
       {session.intervals && (
         <section className="mt-6">
-          <h2 className="mb-2 text-lg font-semibold">Intervals</h2>
+          <h2 className="mb-2 text-lg font-semibold">인터벌</h2>
           <table className="w-full border-collapse text-sm">
             <tbody>
               <tr className="border-b">
-                <td className="p-2 text-muted-foreground">Structure</td>
+                <td className="p-2 text-muted-foreground">구성</td>
                 <td className="p-2 text-right">{session.intervals.structure}</td>
               </tr>
               <tr className="border-b">
-                <td className="p-2 text-muted-foreground">Sets</td>
+                <td className="p-2 text-muted-foreground">세트</td>
                 <td className="p-2 text-right">
                   {session.intervals.totalSets}/{session.intervals.targetSets}
-                  {session.intervals.completed ? ' (completed)' : ''}
+                  {session.intervals.completed ? ' (완료)' : ''}
                 </td>
               </tr>
               <tr className="border-b">
-                <td className="p-2 text-muted-foreground">Avg Work HR</td>
+                <td className="p-2 text-muted-foreground">운동 평균 심박</td>
                 <td className="p-2 text-right">{session.intervals.summary.avgWorkHR || '-'}</td>
               </tr>
               <tr className="border-b">
-                <td className="p-2 text-muted-foreground">Avg Rest HR</td>
+                <td className="p-2 text-muted-foreground">휴식 평균 심박</td>
                 <td className="p-2 text-right">{session.intervals.summary.avgRestHR || '-'}</td>
               </tr>
               <tr className="border-b">
-                <td className="p-2 text-muted-foreground">HR Recovery</td>
+                <td className="p-2 text-muted-foreground">심박 회복량</td>
                 <td className="p-2 text-right">
                   {session.intervals.summary.hrRecovery
                     ? `${session.intervals.summary.hrRecovery} bpm`
@@ -423,36 +417,36 @@ export default async function SessionPage({
       {/* Session Info */}
       {session.metadata && (
         <section className="mt-6">
-          <h2 className="mb-2 text-lg font-semibold">Session Info</h2>
+          <h2 className="mb-2 text-lg font-semibold">세션 정보</h2>
           <table className="w-full border-collapse text-sm">
             <tbody>
               {session.metadata.location && (
                 <tr className="border-b">
-                  <td className="p-2 text-muted-foreground">Location</td>
+                  <td className="p-2 text-muted-foreground">장소</td>
                   <td className="p-2 text-right">{session.metadata.location}</td>
                 </tr>
               )}
               {session.metadata.intent && (
                 <tr className="border-b">
-                  <td className="p-2 text-muted-foreground">Intent</td>
+                  <td className="p-2 text-muted-foreground">훈련 의도</td>
                   <td className="p-2 text-right">{session.metadata.intent}</td>
                 </tr>
               )}
               {session.metadata.rpe && (
                 <tr className="border-b">
-                  <td className="p-2 text-muted-foreground">RPE</td>
+                  <td className="p-2 text-muted-foreground">주관적 강도 (RPE)</td>
                   <td className="p-2 text-right">{session.metadata.rpe}/10</td>
                 </tr>
               )}
               {session.metadata.sleepQuality && (
                 <tr className="border-b">
-                  <td className="p-2 text-muted-foreground">Sleep</td>
+                  <td className="p-2 text-muted-foreground">수면</td>
                   <td className="p-2 text-right">{session.metadata.sleepQuality}</td>
                 </tr>
               )}
               {session.metadata.weather && (
                 <tr className="border-b">
-                  <td className="p-2 text-muted-foreground">Weather</td>
+                  <td className="p-2 text-muted-foreground">날씨</td>
                   <td className="p-2 text-right">
                     {session.metadata.weather.condition}, {session.metadata.weather.temperature}°C,{' '}
                     {session.metadata.weather.humidity}%
@@ -461,7 +455,7 @@ export default async function SessionPage({
               )}
               {session.metadata.notes && (
                 <tr className="border-b">
-                  <td className="p-2 text-muted-foreground">Notes</td>
+                  <td className="p-2 text-muted-foreground">메모</td>
                   <td className="p-2 text-right">{session.metadata.notes}</td>
                 </tr>
               )}
@@ -473,7 +467,7 @@ export default async function SessionPage({
       {/* Feedback */}
       {session.feedback && (
         <section className="mt-6">
-          <h2 className="mb-2 text-lg font-semibold">Coaching Feedback</h2>
+          <h2 className="mb-2 text-lg font-semibold">코칭 피드백</h2>
           <pre className="whitespace-pre-wrap rounded bg-muted p-4 text-sm">{session.feedback}</pre>
         </section>
       )}

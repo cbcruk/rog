@@ -1,5 +1,6 @@
 import { getAllSessionsForPMC, upsertDailyMetrics } from './db.ts'
-import type { PMCDataPoint, FitnessStatus, FitnessTrend } from '@/types/pmc'
+import { getFitnessStatus } from '@/lib/pmc'
+import type { PMCDataPoint, FitnessTrend } from '@/types/pmc'
 
 const CTL_DAYS = 42
 const ATL_DAYS = 7
@@ -91,57 +92,6 @@ export async function calculateAndStorePMC(): Promise<PMCDataPoint[]> {
 
   console.log(`PMC calculated for ${pmcData.length} days`)
   return pmcData
-}
-
-/** TSB 값을 fresh/recovered/neutral/tired/overreaching 상태로 분류한다. */
-export function getFitnessStatus(tsb: number | null): FitnessStatus {
-  if (tsb === null || tsb === undefined) {
-    return {
-      status: 'unknown',
-      label: 'N/A',
-      color: 'gray',
-      advice: '데이터가 부족해 상태를 판정할 수 없어요.',
-    }
-  }
-
-  const v = tsb.toFixed(1)
-
-  if (tsb > 25) {
-    return {
-      status: 'fresh',
-      label: 'Fresh',
-      color: 'green',
-      advice: `TSB ${v}은 최상 범위(+25 이상) 안에 있어요. 고강도 훈련이나 레이스에 적합합니다.`,
-    }
-  } else if (tsb > 5) {
-    return {
-      status: 'recovered',
-      label: 'Recovered',
-      color: 'blue',
-      advice: `TSB ${v}은 회복 범위(+5~+25) 안에 있어요. 가벼운~중간 강도 훈련이 적합합니다.`,
-    }
-  } else if (tsb > -10) {
-    return {
-      status: 'neutral',
-      label: 'Neutral',
-      color: 'yellow',
-      advice: `TSB ${v}은 평상시 범위(-10~+5) 안에 있어요. 평소 훈련량을 유지하면 좋습니다.`,
-    }
-  } else if (tsb > -30) {
-    return {
-      status: 'tired',
-      label: 'Tired',
-      color: 'orange',
-      advice: `TSB ${v}은 피로 범위(-30~-10) 안에 있어요. 회복 러닝이나 휴식을 권장합니다.`,
-    }
-  } else {
-    return {
-      status: 'overreaching',
-      label: 'Overreaching',
-      color: 'red',
-      advice: `TSB ${v}은 과훈련 범위(-30 이하)에요. 며칠간 충분한 휴식이 필요합니다.`,
-    }
-  }
 }
 
 /** 현재 CTL과 이전 CTL을 비교하여 improving/declining/stable 추세를 판정한다. (±5% 기준) */
