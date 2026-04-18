@@ -77,35 +77,6 @@ export async function initDb(): Promise<void> {
     )
   `)
 
-  const newZoneColumns = [
-    'z4_pct',
-    'z5_pct',
-    'z1_seconds',
-    'z2_seconds',
-    'z3_seconds',
-    'z4_seconds',
-    'z5_seconds',
-  ]
-  for (const col of newZoneColumns) {
-    const type = col.endsWith('_pct') ? 'REAL' : 'INTEGER'
-    await db.execute(`ALTER TABLE sessions ADD COLUMN ${col} ${type}`).catch(() => {})
-  }
-
-  const metaColumns = [
-    'session_type TEXT',
-    'intent TEXT',
-    'rpe INTEGER',
-    'sleep_quality TEXT',
-    'fatigue_level TEXT',
-    'notes TEXT',
-  ]
-  for (const colDef of metaColumns) {
-    const col = colDef.split(' ')[0]
-    await db
-      .execute(`ALTER TABLE sessions ADD COLUMN ${col} ${colDef.split(' ').slice(1).join(' ')}`)
-      .catch(() => {})
-  }
-
   await db.execute(`
     CREATE TABLE IF NOT EXISTS user_settings (
       key TEXT PRIMARY KEY,
@@ -124,7 +95,66 @@ export async function initDb(): Promise<void> {
     )
   `)
 
+  await runMigrations()
   await initDefaultSettings()
+}
+
+type Migration = { version: number; description: string; sql: string[] }
+
+const migrations: Migration[] = [
+  {
+    version: 1,
+    description: 'add z4/z5 zone columns',
+    sql: [
+      'ALTER TABLE sessions ADD COLUMN z4_pct REAL',
+      'ALTER TABLE sessions ADD COLUMN z5_pct REAL',
+      'ALTER TABLE sessions ADD COLUMN z1_seconds INTEGER',
+      'ALTER TABLE sessions ADD COLUMN z2_seconds INTEGER',
+      'ALTER TABLE sessions ADD COLUMN z3_seconds INTEGER',
+      'ALTER TABLE sessions ADD COLUMN z4_seconds INTEGER',
+      'ALTER TABLE sessions ADD COLUMN z5_seconds INTEGER',
+    ],
+  },
+  {
+    version: 2,
+    description: 'add session metadata columns',
+    sql: [
+      'ALTER TABLE sessions ADD COLUMN session_type TEXT',
+      'ALTER TABLE sessions ADD COLUMN intent TEXT',
+      'ALTER TABLE sessions ADD COLUMN rpe INTEGER',
+      'ALTER TABLE sessions ADD COLUMN sleep_quality TEXT',
+      'ALTER TABLE sessions ADD COLUMN fatigue_level TEXT',
+      'ALTER TABLE sessions ADD COLUMN notes TEXT',
+    ],
+  },
+]
+
+async function runMigrations(): Promise<void> {
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS schema_version (
+      version INTEGER PRIMARY KEY,
+      description TEXT,
+      applied_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+  `)
+
+  const result = await db.execute('SELECT COALESCE(MAX(version), 0) as v FROM schema_version')
+  const currentVersion = Number(result.rows[0].v)
+
+  for (const migration of migrations) {
+    if (migration.version <= currentVersion) continue
+
+    for (const sql of migration.sql) {
+      await db.execute(sql).catch(() => {})
+    }
+
+    await db.execute({
+      sql: 'INSERT INTO schema_version (version, description) VALUES (?, ?)',
+      args: [migration.version, migration.description],
+    })
+
+    console.log(`Migration ${migration.version}: ${migration.description}`)
+  }
 }
 
 async function initDefaultSettings(): Promise<void> {
