@@ -43,6 +43,13 @@ export async function initDb(): Promise<void> {
       z1_pct REAL,
       z2_pct REAL,
       z3_pct REAL,
+      z4_pct REAL,
+      z5_pct REAL,
+      z1_seconds INTEGER,
+      z2_seconds INTEGER,
+      z3_seconds INTEGER,
+      z4_seconds INTEGER,
+      z5_seconds INTEGER,
       rtss REAL,
       intensity_factor REAL,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
@@ -63,6 +70,20 @@ export async function initDb(): Promise<void> {
       sessions_count INTEGER DEFAULT 0
     )
   `)
+
+  const newZoneColumns = [
+    'z4_pct',
+    'z5_pct',
+    'z1_seconds',
+    'z2_seconds',
+    'z3_seconds',
+    'z4_seconds',
+    'z5_seconds',
+  ]
+  for (const col of newZoneColumns) {
+    const type = col.endsWith('_pct') ? 'REAL' : 'INTEGER'
+    await db.execute(`ALTER TABLE sessions ADD COLUMN ${col} ${type}`).catch(() => {})
+  }
 
   await db.execute(`
     CREATE TABLE IF NOT EXISTS user_settings (
@@ -132,6 +153,13 @@ interface AnalysisInput {
   fatigue?: { dropSeconds: number } | null
   elevation?: { totalAscent: number; totalDescent: number }
   tss?: { rtss: number | null; intensityFactor: number | null }
+  zoneDistribution?: {
+    z1: { pct: number; seconds: number }
+    z2: { pct: number; seconds: number }
+    z3: { pct: number; seconds: number }
+    z4: { pct: number; seconds: number }
+    z5: { pct: number; seconds: number }
+  } | null
 }
 
 /** 분석 결과를 sessions 테이블에 삽입하거나 갱신한다. ID는 `{date}_{startTime}`. */
@@ -146,8 +174,10 @@ export async function upsertSession(analysis: AnalysisInput): Promise<void> {
         avg_pace, avg_hr, max_hr, calories, avg_cadence,
         total_ascent, total_descent, split_type, split_diff_seconds,
         consistency_cv, consistency_rating, hr_drift, fatigue_drop_seconds,
-        rtss, intensity_factor
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        rtss, intensity_factor,
+        z1_pct, z2_pct, z3_pct, z4_pct, z5_pct,
+        z1_seconds, z2_seconds, z3_seconds, z4_seconds, z5_seconds
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
     args: [
       id,
@@ -171,6 +201,16 @@ export async function upsertSession(analysis: AnalysisInput): Promise<void> {
       fatigue?.dropSeconds || null,
       tss?.rtss || null,
       tss?.intensityFactor || null,
+      analysis.zoneDistribution?.z1.pct ?? null,
+      analysis.zoneDistribution?.z2.pct ?? null,
+      analysis.zoneDistribution?.z3.pct ?? null,
+      analysis.zoneDistribution?.z4.pct ?? null,
+      analysis.zoneDistribution?.z5.pct ?? null,
+      analysis.zoneDistribution?.z1.seconds ?? null,
+      analysis.zoneDistribution?.z2.seconds ?? null,
+      analysis.zoneDistribution?.z3.seconds ?? null,
+      analysis.zoneDistribution?.z4.seconds ?? null,
+      analysis.zoneDistribution?.z5.seconds ?? null,
     ],
   })
 }

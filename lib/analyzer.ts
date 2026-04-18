@@ -1,4 +1,5 @@
 import { calculateSessionTSS, getTSSZone } from './tss-calculator.ts'
+import { calculateZoneDistribution } from '@/lib/hr-zones'
 import type {
   FitSession,
   FitRecord,
@@ -311,6 +312,13 @@ export function analyzeRun({ session, laps, records, metadata, settings = {} }: 
     fatigue: fatigueAnalysis,
     elevation,
     intervals: intervalAnalysis,
+    zoneDistribution:
+      settings.lthr && records.length > 0
+        ? calculateZoneDistribution(
+            records.map((r) => r.heartRate).filter((hr): hr is number => hr != null && hr > 0),
+            Number(settings.lthr),
+          )
+        : null,
     tss: {
       rtss: tssResult.rtss,
       intensityFactor: tssResult.intensityFactor,

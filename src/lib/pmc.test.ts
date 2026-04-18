@@ -5,7 +5,7 @@ describe('getFitnessStatus', () => {
   it('TSB > 25이면 fresh를 반환한다', () => {
     const status = getFitnessStatus(30)
     expect(status.status).toBe('fresh')
-    expect(status.label).toBe('Fresh')
+    expect(status.label).toBe('최상 (Fresh)')
     expect(status.color).toBe('green')
   })
 
@@ -36,8 +36,14 @@ describe('getFitnessStatus', () => {
   it('null이면 unknown을 반환한다', () => {
     const status = getFitnessStatus(null)
     expect(status.status).toBe('unknown')
-    expect(status.label).toBe('N/A')
+    expect(status.label).toBe('데이터 없음')
     expect(status.color).toBe('gray')
+  })
+
+  it('advice에 TSB 값과 범위가 포함된다', () => {
+    const status = getFitnessStatus(-1)
+    expect(status.advice).toContain('TSB -1.0')
+    expect(status.advice).toContain('-10~+5')
   })
 
   it('경계값을 올바르게 분류한다', () => {

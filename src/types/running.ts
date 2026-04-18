@@ -1,3 +1,5 @@
+import type { ZoneDistribution } from '@/lib/hr-zones'
+
 export type SessionType =
   /** 역치 인터벌 */
   | 'threshold_interval'
@@ -375,6 +377,8 @@ export interface RunSession {
   fatigue: FatigueAnalysis | null
   elevation: ElevationAnalysis
   intervals: IntervalAnalysis | null
+  /** LTHR 기반 5-Zone HR 분포 (분석 시 LTHR 설정이 있는 경우에만 생성) */
+  zoneDistribution: ZoneDistribution | null
 }
 
 /** HR 기반 자동 인터벌 감지 결과 */

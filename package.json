@@ -9,9 +9,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "vp lint",
-    "sync:analyze": "tsx lib/index.ts",
-    "sync": "tsx lib/sync.ts",
+    "sync": "pnpm run sync:garmin && pnpm run sync:db && pnpm run sync:analyze",
+    "sync:garmin": "tsx lib/sync.ts",
     "sync:db": "tsx lib/db.ts",
+    "sync:analyze": "tsx lib/index.ts",
     "prepare": "vp config",
     "test": "vp test --watch"
   },

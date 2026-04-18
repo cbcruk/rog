@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getSession, getAllSessionIds } from '@/lib/sessions'
+import { getZone } from '@/lib/hr-zones'
+import { getSettings } from '@/lib/settings'
 
 export async function generateStaticParams(): Promise<{ id: string }[]> {
   const ids = getAllSessionIds()
@@ -25,26 +27,20 @@ function formatTime(isoStr: string): string {
   })
 }
 
-function getHRZone(hr: number): string {
-  if (hr < 145) return 'Z1'
-  if (hr < 158) return 'Z1.5'
-  if (hr < 165) return 'Z2'
-  return 'Z3'
-}
-
 export default async function SessionPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }): Promise<React.ReactElement> {
   const { id } = await params
-  const session = getSession(id)
+  const [session, settings] = await Promise.all([Promise.resolve(getSession(id)), getSettings()])
 
   if (!session) {
     notFound()
   }
 
   const showElevation = session.elevation.totalAscent > 0
+  const lthr = settings.lthr
 
   return (
     <div className="p-4">
@@ -131,7 +127,7 @@ export default async function SessionPage({
                     <td className="p-2 text-right">{lap.paceFormatted}</td>
                     <td className="p-2 text-right text-(--red)">{lap.heartRate}</td>
                     <td className="p-2 text-right text-muted-foreground">
-                      {getHRZone(lap.heartRate)}
+                      Z{getZone(lap.heartRate, lthr)}
                     </td>
                     {lap.cadence && <td className="p-2 text-right">{lap.cadence}</td>}
                     {showElevation && (
@@ -228,6 +224,59 @@ export default async function SessionPage({
                   {session.heartRate.drift}%
                 </td>
               </tr>
+            </tbody>
+          </table>
+        </section>
+      )}
+
+      {/* Zone Distribution */}
+      {session.zoneDistribution && (
+        <section className="mt-6">
+          <h2 className="mb-2 text-lg font-semibold">HR Zone Distribution</h2>
+          <div className="mb-3 flex h-4 overflow-hidden rounded-full">
+            {[
+              { zone: session.zoneDistribution.z1, color: 'bg-blue/60', label: 'Z1' },
+              { zone: session.zoneDistribution.z2, color: 'bg-green', label: 'Z2' },
+              { zone: session.zoneDistribution.z3, color: 'bg-yellow', label: 'Z3' },
+              { zone: session.zoneDistribution.z4, color: 'bg-orange', label: 'Z4' },
+              { zone: session.zoneDistribution.z5, color: 'bg-red', label: 'Z5' },
+            ].map(
+              ({ zone, color, label }) =>
+                zone.pct > 0 && (
+                  <div
+                    key={label}
+                    className={`${color} flex items-center justify-center text-[10px] font-medium text-background`}
+                    style={{ width: `${zone.pct}%` }}
+                  >
+                    {zone.pct >= 8 ? `${label} ${zone.pct}%` : ''}
+                  </div>
+                ),
+            )}
+          </div>
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-b">
+                <th className="p-2 text-left text-muted-foreground">Zone</th>
+                <th className="p-2 text-right text-muted-foreground">시간</th>
+                <th className="p-2 text-right text-muted-foreground">비율</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { label: 'Z1 (회복)', z: session.zoneDistribution.z1 },
+                { label: 'Z2 (유산소)', z: session.zoneDistribution.z2 },
+                { label: 'Z3 (템포)', z: session.zoneDistribution.z3 },
+                { label: 'Z4 (역치)', z: session.zoneDistribution.z4 },
+                { label: 'Z5 (VO2max)', z: session.zoneDistribution.z5 },
+              ].map(({ label, z }) => (
+                <tr key={label} className="border-b">
+                  <td className="p-2">{label}</td>
+                  <td className="p-2 text-right">
+                    {Math.floor(z.seconds / 60)}:{String(z.seconds % 60).padStart(2, '0')}
+                  </td>
+                  <td className="p-2 text-right">{z.pct}%</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </section>

@@ -74,7 +74,7 @@ export function PMCChart({
             <stop offset="95%" stopColor={COLORS.atl} stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke={COLORS.grid} opacity={0.3} />
+        <CartesianGrid strokeDasharray="3 3" stroke={COLORS.grid} opacity={0.15} />
         <XAxis dataKey="dateLabel" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
         <YAxis
           tick={{ fontSize: 12 }}
