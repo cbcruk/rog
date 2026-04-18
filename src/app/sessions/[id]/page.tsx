@@ -282,6 +282,52 @@ export default async function SessionPage({
         </section>
       )}
 
+      {/* Session Quality */}
+      {session.quality && (
+        <section className="mt-6">
+          <h2 className="mb-2 text-lg font-semibold">
+            세션 품질{' '}
+            <span
+              className={
+                session.quality.grade === 'pass'
+                  ? 'text-green'
+                  : session.quality.grade === 'partial'
+                    ? 'text-yellow'
+                    : 'text-red'
+              }
+            >
+              {session.quality.grade === 'pass'
+                ? '✓ 달성'
+                : session.quality.grade === 'partial'
+                  ? '△ 부분 달성'
+                  : '✗ 미달성'}
+            </span>
+          </h2>
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-b">
+                <th className="p-2 text-left text-muted-foreground">기준</th>
+                <th className="p-2 text-right text-muted-foreground">실제</th>
+                <th className="p-2 text-right text-muted-foreground">목표</th>
+                <th className="p-2 text-right text-muted-foreground">결과</th>
+              </tr>
+            </thead>
+            <tbody>
+              {session.quality.criteria.map((c) => (
+                <tr key={c.label} className="border-b">
+                  <td className="p-2">{c.label}</td>
+                  <td className="p-2 text-right">{c.actual}</td>
+                  <td className="p-2 text-right text-muted-foreground">{c.target}</td>
+                  <td className={`p-2 text-right ${c.passed ? 'text-green' : 'text-red'}`}>
+                    {c.passed ? '✓' : '✗'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      )}
+
       {/* Intervals */}
       {session.intervals && (
         <section className="mt-6">

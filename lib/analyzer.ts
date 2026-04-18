@@ -1,5 +1,6 @@
 import { calculateSessionTSS, getTSSZone } from './tss-calculator.ts'
 import { calculateZoneDistribution } from '@/lib/hr-zones'
+import { scoreSession } from '@/lib/quality-scorer'
 import type {
   FitSession,
   FitRecord,
@@ -286,6 +287,14 @@ export function analyzeRun({ session, laps, records, metadata, settings = {} }: 
     totalDescent: session.totalDescent || 0,
   }
 
+  const zoneDist =
+    settings.lthr && records.length > 0
+      ? calculateZoneDistribution(
+          records.map((r) => r.heartRate).filter((hr): hr is number => hr != null && hr > 0),
+          Number(settings.lthr),
+        )
+      : null
+
   return {
     date: localDate,
     startTime: session.startTime.toISOString(),
@@ -312,12 +321,10 @@ export function analyzeRun({ session, laps, records, metadata, settings = {} }: 
     fatigue: fatigueAnalysis,
     elevation,
     intervals: intervalAnalysis,
-    zoneDistribution:
-      settings.lthr && records.length > 0
-        ? calculateZoneDistribution(
-            records.map((r) => r.heartRate).filter((hr): hr is number => hr != null && hr > 0),
-            Number(settings.lthr),
-          )
+    zoneDistribution: zoneDist,
+    quality:
+      metadata?.type && zoneDist
+        ? scoreSession(metadata.type, zoneDist, Math.round(session.totalElapsedTime))
         : null,
     tss: {
       rtss: tssResult.rtss,
