@@ -340,7 +340,7 @@ export default async function SessionPage({
                     역치 <strong className="text-orange">{b.threshold.pct}%</strong>
                   </span>
                   <span>
-                    수프라 <strong className="text-red">{b.supra.pct}%</strong>
+                    VO2max <strong className="text-red">{b.supra.pct}%</strong>
                   </span>
                 </div>
               )

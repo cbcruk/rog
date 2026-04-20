@@ -5,7 +5,7 @@ import { PMCLegendCard } from './pmc-legend-card'
  */
 export function PMCLegend(): React.ReactElement {
   return (
-    <div className="mt-6 grid gap-4 sm:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-3">
       <PMCLegendCard
         dotColor="bg-blue"
         label="체력 (CTL)"

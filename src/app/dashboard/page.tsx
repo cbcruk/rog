@@ -29,13 +29,13 @@ function DashboardContent({
   if (!hasData) return EmptyState
 
   return (
-    <>
+    <div className="flex flex-col gap-6">
       <StatCards summary={summary} />
       {zoneStats && <ZoneStatsCard stats={zoneStats} />}
       <RecommendationsCard recommendations={recommendations} />
       <PMCChartCard data={pmcData} />
       <PMCLegend />
-    </>
+    </div>
   )
 }
 
@@ -51,7 +51,7 @@ export default async function DashboardPage(): Promise<React.ReactElement> {
 
   return (
     <div className="p-4 lg:p-6">
-      <h1 hidden className="mb-6 text-xl font-bold">
+      <h1 hidden className="text-xl font-bold">
         대시보드
       </h1>
       <DashboardContent

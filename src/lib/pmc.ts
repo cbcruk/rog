@@ -139,9 +139,11 @@ export function getWeeklyTSSComparison(weeklyTSS: number, currentCTL: number): s
 export async function getWeeklyZoneStats(): Promise<WeeklyZoneStats | null> {
   const db = createDbClient()
 
+  const today = new Date()
   const weekAgo = new Date()
   weekAgo.setDate(weekAgo.getDate() - 7)
   const weekAgoStr = weekAgo.toISOString().split('T')[0]
+  const todayStr = today.toISOString().split('T')[0]
 
   const result = await db.execute({
     sql: `
@@ -170,15 +172,18 @@ export async function getWeeklyZoneStats(): Promise<WeeklyZoneStats | null> {
 
   if (total === 0) return null
 
-  const easy = z1 + z2
-  const hard = z3 + z4 + z5
+  const easy = z1 + z2 + z3
 
   return {
-    z4Seconds: z4,
-    z5Seconds: z5,
+    easySeconds: easy,
     easyPct: Math.round((easy / total) * 100),
-    hardPct: Math.round((hard / total) * 100),
+    thresholdSeconds: z4,
+    thresholdPct: Math.round((z4 / total) * 100),
+    supraSeconds: z5,
+    supraPct: Math.round((z5 / total) * 100),
     totalSeconds: total,
+    startDate: weekAgoStr,
+    endDate: todayStr,
   }
 }
 
@@ -211,8 +216,8 @@ export async function getRecommendationInput(
 
   return {
     tsb,
-    weeklyZ4Seconds: zoneStats?.z4Seconds ?? 0,
-    weeklyZ5Seconds: zoneStats?.z5Seconds ?? 0,
+    weeklyZ4Seconds: zoneStats?.thresholdSeconds ?? 0,
+    weeklyZ5Seconds: zoneStats?.supraSeconds ?? 0,
     weeklyDistance,
     fourWeekAvgDistance,
   }

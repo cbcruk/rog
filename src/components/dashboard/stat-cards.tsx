@@ -16,7 +16,7 @@ interface StatCardsProps {
  */
 export function StatCards({ summary }: StatCardsProps): React.ReactElement {
   return (
-    <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <StatCard
         label={<TermLabel term="체력 (CTL)" definition="Chronic Training Load — 만성 훈련 부하." />}
         value={summary.currentCTL.toFixed(1)}

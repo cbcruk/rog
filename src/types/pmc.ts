@@ -86,18 +86,26 @@ export interface PMCChartProps {
   days?: number
 }
 
-/** 주간 HR Zone 시간 집계 */
+/** 주간 HR Zone 시간 집계 (Bakken 3-zone 모델 기준) */
 export interface WeeklyZoneStats {
-  /** Z4(역치) 총 시간(초) */
-  z4Seconds: number
-  /** Z5(VO2max) 총 시간(초) */
-  z5Seconds: number
-  /** 이지 비율(Z1+Z2) % */
+  /** 이지 구간 (Bakken Z1 = Friel Z1+Z2+Z3) 총 시간(초) */
+  easySeconds: number
+  /** 이지 구간 비율 (%) */
   easyPct: number
-  /** 하드 비율(Z3+Z4+Z5) % */
-  hardPct: number
+  /** 역치 구간 (Bakken Z2 = Friel Z4) 총 시간(초) */
+  thresholdSeconds: number
+  /** 역치 구간 비율 (%) */
+  thresholdPct: number
+  /** VO2max 구간 (Bakken Z3 = Friel Z5) 총 시간(초) */
+  supraSeconds: number
+  /** VO2max 구간 비율 (%) */
+  supraPct: number
   /** 총 훈련 시간(초) */
   totalSeconds: number
+  /** 집계 기간 시작일 (YYYY-MM-DD) */
+  startDate: string
+  /** 집계 기간 종료일 (YYYY-MM-DD, 오늘) */
+  endDate: string
 }
 
 /** 대시보드 PMC 요약 */

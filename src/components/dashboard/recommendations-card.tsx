@@ -18,7 +18,7 @@ export function RecommendationsCard({
   recommendations,
 }: RecommendationsCardProps): React.ReactElement {
   return (
-    <div className="mb-6 rounded-lg border bg-muted p-4">
+    <div className="rounded-lg border bg-muted p-4">
       <h2 className="mb-3 text-sm font-medium text-muted-foreground">이번 주 훈련 추천</h2>
       <ul className="space-y-2">
         {recommendations.map((rec, i) => {
