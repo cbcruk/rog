@@ -68,7 +68,7 @@ describe('calculateZoneDistribution', () => {
 })
 
 describe('toBakkenZones', () => {
-  it('Friel Z1+Z2+Z3 → Easy, Z4 → Threshold, Z5 → Supra', () => {
+  it('Friel Z1+Z2 → Easy, Z3+Z4 → Threshold, Z5 → Supra', () => {
     const dist: ZoneDistribution = {
       z1: { seconds: 100, pct: 20 },
       z2: { seconds: 150, pct: 30 },
@@ -77,10 +77,10 @@ describe('toBakkenZones', () => {
       z5: { seconds: 50, pct: 10 },
     }
     const bakken = toBakkenZones(dist)
-    expect(bakken.easy.seconds).toBe(300)
-    expect(bakken.easy.pct).toBe(60)
-    expect(bakken.threshold.seconds).toBe(150)
-    expect(bakken.threshold.pct).toBe(30)
+    expect(bakken.easy.seconds).toBe(250)
+    expect(bakken.easy.pct).toBe(50)
+    expect(bakken.threshold.seconds).toBe(200)
+    expect(bakken.threshold.pct).toBe(40)
     expect(bakken.supra.seconds).toBe(50)
     expect(bakken.supra.pct).toBe(10)
   })

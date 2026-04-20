@@ -73,9 +73,9 @@ export interface BakkenZones {
 
 /**
  * Friel 5-Zone 분포를 Bakken 3-Zone으로 매핑한다.
- * - Easy (Z1): Friel Z1+Z2+Z3 (LTHR 94% 미만)
- * - Threshold (Z2): Friel Z4 (LTHR 94~100%)
- * - Supra (Z3): Friel Z5 (LTHR 100% 초과)
+ * - Easy (Z1): Friel Z1+Z2 (LT1 이하, LTHR 89% 미만)
+ * - Threshold (Z2): Friel Z3+Z4 (LT1~LT2, LTHR 89~100%)
+ * - Supra/VO2max (Z3): Friel Z5 (LT2 초과, LTHR 100% 초과)
  */
 export function toBakkenZones(dist: ZoneDistribution): BakkenZones {
   const total =
@@ -86,8 +86,8 @@ export function toBakkenZones(dist: ZoneDistribution): BakkenZones {
   }
 
   return {
-    easy: merge(dist.z1.seconds + dist.z2.seconds + dist.z3.seconds),
-    threshold: merge(dist.z4.seconds),
+    easy: merge(dist.z1.seconds + dist.z2.seconds),
+    threshold: merge(dist.z3.seconds + dist.z4.seconds),
     supra: merge(dist.z5.seconds),
   }
 }

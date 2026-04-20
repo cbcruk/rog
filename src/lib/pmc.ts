@@ -172,13 +172,14 @@ export async function getWeeklyZoneStats(): Promise<WeeklyZoneStats | null> {
 
   if (total === 0) return null
 
-  const easy = z1 + z2 + z3
+  const easy = z1 + z2
+  const threshold = z3 + z4
 
   return {
     easySeconds: easy,
     easyPct: Math.round((easy / total) * 100),
-    thresholdSeconds: z4,
-    thresholdPct: Math.round((z4 / total) * 100),
+    thresholdSeconds: threshold,
+    thresholdPct: Math.round((threshold / total) * 100),
     supraSeconds: z5,
     supraPct: Math.round((z5 / total) * 100),
     totalSeconds: total,
