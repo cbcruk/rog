@@ -100,8 +100,14 @@ export interface WeeklyZoneStats {
   supraSeconds: number
   /** VO2max 구간 비율 (%) */
   supraPct: number
-  /** 총 훈련 시간(초) */
+  /** 존 분석된 훈련 시간(초). easy+threshold+supra의 합 */
   totalSeconds: number
+  /** 주간 전체 세션의 훈련 시간(초). 존 분석 여부와 무관하게 합산 */
+  totalWeekSeconds: number
+  /** 존 분석된 세션 수 */
+  analyzedSessions: number
+  /** 주간 전체 세션 수 */
+  totalSessions: number
   /** 집계 기간 시작일 (YYYY-MM-DD) */
   startDate: string
   /** 집계 기간 종료일 (YYYY-MM-DD, 오늘) */

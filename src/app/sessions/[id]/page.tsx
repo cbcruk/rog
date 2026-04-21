@@ -334,13 +334,13 @@ export default async function SessionPage({
               return (
                 <div className="flex gap-4 text-sm">
                   <span>
-                    이지 <strong>{b.easy.pct}%</strong>
+                    LT1 이하 <strong>{b.easy.pct}%</strong>
                   </span>
                   <span>
-                    역치 <strong className="text-orange">{b.threshold.pct}%</strong>
+                    LT1~LT2 <strong className="text-orange">{b.threshold.pct}%</strong>
                   </span>
                   <span>
-                    VO2max <strong className="text-red">{b.supra.pct}%</strong>
+                    LT2 초과 <strong className="text-red">{b.supra.pct}%</strong>
                   </span>
                 </div>
               )

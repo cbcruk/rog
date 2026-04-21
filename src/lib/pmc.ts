@@ -145,44 +145,62 @@ export async function getWeeklyZoneStats(): Promise<WeeklyZoneStats | null> {
   const weekAgoStr = weekAgo.toISOString().split('T')[0]
   const todayStr = today.toISOString().split('T')[0]
 
-  const result = await db.execute({
-    sql: `
-      SELECT
-        COALESCE(SUM(z1_seconds), 0) as z1,
-        COALESCE(SUM(z2_seconds), 0) as z2,
-        COALESCE(SUM(z3_seconds), 0) as z3,
-        COALESCE(SUM(z4_seconds), 0) as z4,
-        COALESCE(SUM(z5_seconds), 0) as z5
-      FROM sessions
-      WHERE date >= ?
-        AND z1_seconds IS NOT NULL
-    `,
-    args: [weekAgoStr],
-  })
+  const [zoneResult, totalResult] = await Promise.all([
+    db.execute({
+      sql: `
+        SELECT
+          COALESCE(SUM(z1_seconds), 0) as z1,
+          COALESCE(SUM(z2_seconds), 0) as z2,
+          COALESCE(SUM(z3_seconds), 0) as z3,
+          COALESCE(SUM(z4_seconds), 0) as z4,
+          COALESCE(SUM(z5_seconds), 0) as z5,
+          COUNT(*) as analyzed_sessions
+        FROM sessions
+        WHERE date >= ?
+          AND z1_seconds IS NOT NULL
+      `,
+      args: [weekAgoStr],
+    }),
+    db.execute({
+      sql: `
+        SELECT
+          COALESCE(SUM(duration_seconds), 0) as total_seconds,
+          COUNT(*) as total_sessions
+        FROM sessions
+        WHERE date >= ?
+      `,
+      args: [weekAgoStr],
+    }),
+  ])
 
-  if (result.rows.length === 0) return null
-
-  const row = result.rows[0]
-  const z1 = Number(row.z1)
-  const z2 = Number(row.z2)
-  const z3 = Number(row.z3)
-  const z4 = Number(row.z4)
-  const z5 = Number(row.z5)
+  const zoneRow = zoneResult.rows[0]
+  const totalRow = totalResult.rows[0]
+  const z1 = Number(zoneRow.z1)
+  const z2 = Number(zoneRow.z2)
+  const z3 = Number(zoneRow.z3)
+  const z4 = Number(zoneRow.z4)
+  const z5 = Number(zoneRow.z5)
   const total = z1 + z2 + z3 + z4 + z5
+  const analyzedSessions = Number(zoneRow.analyzed_sessions)
+  const totalSessions = Number(totalRow.total_sessions)
+  const totalWeekSeconds = Number(totalRow.total_seconds)
 
-  if (total === 0) return null
+  if (totalSessions === 0) return null
 
   const easy = z1 + z2
   const threshold = z3 + z4
 
   return {
     easySeconds: easy,
-    easyPct: Math.round((easy / total) * 100),
+    easyPct: total > 0 ? Math.round((easy / total) * 100) : 0,
     thresholdSeconds: threshold,
-    thresholdPct: Math.round((threshold / total) * 100),
+    thresholdPct: total > 0 ? Math.round((threshold / total) * 100) : 0,
     supraSeconds: z5,
-    supraPct: Math.round((z5 / total) * 100),
+    supraPct: total > 0 ? Math.round((z5 / total) * 100) : 0,
     totalSeconds: total,
+    totalWeekSeconds,
+    analyzedSessions,
+    totalSessions,
     startDate: weekAgoStr,
     endDate: todayStr,
   }

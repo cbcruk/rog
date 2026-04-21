@@ -42,18 +42,40 @@ export function getZone(hr: number, lthr: number): ZoneNumber {
   return 5
 }
 
-/** HR 레코드 배열에서 존별 시간 분포를 계산한다. */
-export function calculateZoneDistribution(heartRates: number[], lthr: number): ZoneDistribution {
-  const counts = { z1: 0, z2: 0, z3: 0, z4: 0, z5: 0 }
-  const total = heartRates.length
+export interface HRRecord {
+  /** ISO timestamp 또는 Date 객체 */
+  timestamp: string | Date
+  /** 심박 (bpm). null/undefined/0이면 해당 구간은 집계에서 제외 */
+  heartRate?: number | null
+}
 
-  for (const hr of heartRates) {
-    const zone = getZone(hr, lthr)
-    counts[`z${zone}`] += 1
+/**
+ * HR 레코드 배열에서 존별 시간 분포를 계산한다.
+ * 연속 레코드의 timestamp 차이를 사용해 실제 경과 시간을 기준으로 집계하므로
+ * Garmin smart recording 등 비균등 샘플링에서도 정확한 값을 반환한다.
+ */
+export function calculateZoneDistribution(records: HRRecord[], lthr: number): ZoneDistribution {
+  const counts = { z1: 0, z2: 0, z3: 0, z4: 0, z5: 0 }
+  let total = 0
+
+  for (let i = 0; i < records.length - 1; i++) {
+    const current = records[i]
+    if (current.heartRate == null || current.heartRate <= 0) continue
+
+    const currentTime = new Date(current.timestamp).getTime()
+    const nextTime = new Date(records[i + 1].timestamp).getTime()
+    const dt = (nextTime - currentTime) / 1000
+
+    if (dt <= 0 || dt > 60) continue
+
+    const zone = getZone(current.heartRate, lthr)
+    counts[`z${zone}`] += dt
+    total += dt
   }
 
   function toZoneTime(seconds: number): ZoneTime {
-    return { seconds, pct: total > 0 ? Math.round((seconds / total) * 100) : 0 }
+    const rounded = Math.round(seconds)
+    return { seconds: rounded, pct: total > 0 ? Math.round((seconds / total) * 100) : 0 }
   }
 
   return {

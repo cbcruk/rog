@@ -6,6 +6,7 @@ import { StatCards } from '@/components/dashboard/stat-cards'
 import { ZoneStatsCard } from '@/components/dashboard/zone-stats-card'
 import { getPMCData, getPMCSummary, getWeeklyZoneStats, getRecommendationInput } from '@/lib/pmc'
 import { getRecommendations } from '@/lib/recommendations'
+import { getSettings } from '@/lib/settings'
 import type { PMCDataPoint, PMCSummary, WeeklyZoneStats } from '@/types/pmc'
 import type { Recommendation } from '@/lib/recommendations'
 
@@ -16,6 +17,7 @@ interface DashboardContentProps {
   summary: PMCSummary | null
   zoneStats: WeeklyZoneStats | null
   recommendations: Recommendation[]
+  lthr: number
 }
 
 function DashboardContent({
@@ -23,6 +25,7 @@ function DashboardContent({
   summary,
   zoneStats,
   recommendations,
+  lthr,
 }: DashboardContentProps): React.ReactElement {
   const hasData = pmcData.length > 0 && summary !== null
 
@@ -31,7 +34,7 @@ function DashboardContent({
   return (
     <div className="flex flex-col gap-6">
       <StatCards summary={summary} />
-      {zoneStats && <ZoneStatsCard stats={zoneStats} />}
+      {zoneStats && <ZoneStatsCard stats={zoneStats} lthr={lthr} />}
       <RecommendationsCard recommendations={recommendations} />
       <PMCChartCard data={pmcData} />
       <PMCLegend />
@@ -40,10 +43,11 @@ function DashboardContent({
 }
 
 export default async function DashboardPage(): Promise<React.ReactElement> {
-  const [pmcData, summary, zoneStats] = await Promise.all([
+  const [pmcData, summary, zoneStats, settings] = await Promise.all([
     getPMCData(90),
     getPMCSummary(),
     getWeeklyZoneStats(),
+    getSettings(),
   ])
 
   const recInput = summary ? await getRecommendationInput(summary.currentTSB, zoneStats) : null
@@ -59,6 +63,7 @@ export default async function DashboardPage(): Promise<React.ReactElement> {
         summary={summary}
         zoneStats={zoneStats}
         recommendations={recommendations}
+        lthr={settings.lthr}
       />
     </div>
   )

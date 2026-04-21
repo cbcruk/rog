@@ -45,19 +45,61 @@ describe('getZone', () => {
 })
 
 describe('calculateZoneDistribution', () => {
-  it('모든 HR이 동일 존이면 해당 존 100%', () => {
-    const hrs = Array(100).fill(130)
-    const dist = calculateZoneDistribution(hrs, 165)
+  function makeRecords(
+    entries: Array<{ hr: number | null; deltaSec: number }>,
+  ): Array<{ timestamp: string; heartRate: number | null }> {
+    const base = new Date('2026-01-01T00:00:00Z').getTime()
+    let t = base
+    return entries.map((e) => {
+      const record = { timestamp: new Date(t).toISOString(), heartRate: e.hr }
+      t += e.deltaSec * 1000
+      return record
+    })
+  }
+
+  it('1초 간격 균등 샘플링: 레코드 수 = 초', () => {
+    const records = makeRecords(Array(100).fill({ hr: 130, deltaSec: 1 }))
+    const dist = calculateZoneDistribution(records, 165)
     expect(dist.z1.pct).toBe(100)
-    expect(dist.z1.seconds).toBe(100)
-    expect(dist.z2.seconds).toBe(0)
+    expect(dist.z1.seconds).toBe(99)
   })
 
-  it('두 존에 고르게 분포하면 각 50%', () => {
-    const hrs = [...Array(50).fill(130), ...Array(50).fill(170)]
-    const dist = calculateZoneDistribution(hrs, 165)
-    expect(dist.z1.pct).toBe(50)
-    expect(dist.z5.pct).toBe(50)
+  it('smart recording(7초 간격): 실제 경과 시간으로 집계', () => {
+    const records = makeRecords(Array(50).fill({ hr: 130, deltaSec: 7 }))
+    const dist = calculateZoneDistribution(records, 165)
+    expect(dist.z1.seconds).toBe(49 * 7)
+    expect(dist.z1.pct).toBe(100)
+  })
+
+  it('두 존에 고르게 분포하면 각각 절반 정도', () => {
+    const records = makeRecords([
+      ...Array(50).fill({ hr: 130, deltaSec: 1 }),
+      ...Array(50).fill({ hr: 170, deltaSec: 1 }),
+    ])
+    const dist = calculateZoneDistribution(records, 165)
+    expect(dist.z1.pct + dist.z5.pct).toBe(100)
+    expect(Math.abs(dist.z1.pct - dist.z5.pct)).toBeLessThanOrEqual(2)
+  })
+
+  it('HR=null 레코드는 건너뛴다', () => {
+    const records = makeRecords([
+      { hr: 130, deltaSec: 1 },
+      { hr: null, deltaSec: 1 },
+      { hr: 130, deltaSec: 1 },
+      { hr: 130, deltaSec: 1 },
+    ])
+    const dist = calculateZoneDistribution(records, 165)
+    expect(dist.z1.seconds).toBe(2)
+  })
+
+  it('60초 이상 gap은 이상치로 간주하고 제외', () => {
+    const records = makeRecords([
+      { hr: 130, deltaSec: 1 },
+      { hr: 130, deltaSec: 300 },
+      { hr: 130, deltaSec: 1 },
+    ])
+    const dist = calculateZoneDistribution(records, 165)
+    expect(dist.z1.seconds).toBe(1)
   })
 
   it('빈 배열이면 모두 0', () => {

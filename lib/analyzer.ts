@@ -295,10 +295,7 @@ export function analyzeRun({ session, laps, records, metadata, settings = {} }: 
 
   const zoneDist =
     settings.lthr && records.length > 0
-      ? calculateZoneDistribution(
-          records.map((r) => r.heartRate).filter((hr): hr is number => hr != null && hr > 0),
-          Number(settings.lthr),
-        )
+      ? calculateZoneDistribution(records, Number(settings.lthr))
       : null
 
   return {
