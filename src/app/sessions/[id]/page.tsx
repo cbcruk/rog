@@ -5,6 +5,7 @@ import { getZone, toBakkenZones } from '@/lib/hr-zones'
 import { getSettings } from '@/lib/settings'
 import { getLatestLT2ForEnvironment } from '@/../lib/db'
 import { detectEnvironment, compareLT2, formatPaceFromSeconds } from '@/lib/lt2-comparison'
+import { SessionFeedback } from '@/components/session-feedback/session-feedback'
 
 export async function generateStaticParams(): Promise<{ id: string }[]> {
   const ids = getAllSessionIds()
@@ -495,13 +496,7 @@ export default async function SessionPage({
         </section>
       )}
 
-      {/* Feedback */}
-      {session.feedback && (
-        <section className="mt-6">
-          <h2 className="mb-2 text-lg font-semibold">코칭 피드백</h2>
-          <pre className="whitespace-pre-wrap rounded bg-muted p-4 text-sm">{session.feedback}</pre>
-        </section>
-      )}
+      <SessionFeedback feedback={session.feedback} sessionId={id} />
     </div>
   )
 }
