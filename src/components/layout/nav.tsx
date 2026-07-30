@@ -2,10 +2,11 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BarChart3, ClipboardList, Settings } from 'lucide-react'
+import { BarChart3, CalendarRange, ClipboardList, Settings } from 'lucide-react'
 
 const navItems = [
   { href: '/dashboard', label: '대시보드', icon: BarChart3 },
+  { href: '/program', label: '프로그램', icon: CalendarRange },
   { href: '/sessions', label: '세션', icon: ClipboardList },
   { href: '/settings', label: '설정', icon: Settings },
 ]
