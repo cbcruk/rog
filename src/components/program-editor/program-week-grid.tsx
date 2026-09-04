@@ -1,6 +1,9 @@
 'use client'
 
 import { Plus } from 'lucide-react'
+import { Card } from '@astryxdesign/core/Card'
+import { Icon } from '@astryxdesign/core/Icon'
+import { Text } from '@astryxdesign/core/Text'
 import { groupSessionsByDay } from '@/lib/program-metrics'
 import type { PlannedSession } from '@/types/program'
 import {
@@ -28,74 +31,88 @@ export function ProgramWeekGrid({
   const days = groupSessionsByDay(sessions)
 
   return (
-    <div className="grid grid-cols-7 overflow-hidden rounded-lg border bg-muted">
-      {days.map((daySessions, dayIndex) => {
-        const selected = selectedDay === dayIndex
-        const isHard = daySessions.some((s) => s.thresholdMinutes > 0 || s.supraMinutes > 0)
+    <Card padding={0}>
+      <div className="grid grid-cols-7">
+        {days.map((daySessions, dayIndex) => {
+          const selected = selectedDay === dayIndex
+          const isHard = daySessions.some((s) => s.thresholdMinutes > 0 || s.supraMinutes > 0)
 
-        return (
-          <button
-            key={dayIndex}
-            type="button"
-            onClick={() => onSelectDay(dayIndex)}
-            aria-pressed={selected}
-            className={`flex min-h-32 flex-col text-left transition-colors ${
-              dayIndex < 6 ? 'border-r' : ''
-            } ${selected ? 'bg-foreground/5' : 'hover:bg-foreground/[0.02]'}`}
-          >
-            <div
-              className={`flex w-full items-center justify-between border-b px-2 py-1 ${
-                selected ? 'border-foreground/20' : ''
-              }`}
+          return (
+            <button
+              key={dayIndex}
+              type="button"
+              onClick={() => onSelectDay(dayIndex)}
+              aria-pressed={selected}
+              className={`flex min-h-32 flex-col text-left transition-colors ${
+                dayIndex < 6 ? 'border-r border-border' : ''
+              } ${selected ? 'bg-muted' : 'hover:bg-muted'}`}
             >
-              <span className="text-[11px] font-medium">{DAY_LABELS[dayIndex]}</span>
-              {isHard && (
-                <span
-                  className="inline-flex w-1.5 rounded-full aspect-square"
-                  style={{ backgroundColor: 'var(--red)' }}
-                />
-              )}
-            </div>
+              <div className="flex w-full items-center justify-between border-b border-border px-2 py-1">
+                <Text type="label" size="sm">
+                  {DAY_LABELS[dayIndex]}
+                </Text>
+                {isHard && (
+                  <span
+                    aria-hidden
+                    className="inline-flex w-1.5 rounded-full aspect-square"
+                    style={{ backgroundColor: 'var(--color-data-categorical-red)' }}
+                  />
+                )}
+              </div>
 
-            <div className="flex flex-1 flex-col gap-1 p-1.5">
-              {daySessions.length === 0 ? (
-                <span className="flex flex-1 items-center justify-center gap-1 text-[11px] text-muted-foreground/50">
-                  <Plus className="size-3" />
-                  휴식
-                </span>
-              ) : (
-                daySessions.map((session) => (
-                  <div key={session.id} className="rounded-md bg-background px-1.5 py-1">
-                    <div className="flex items-center gap-1">
-                      <span
-                        className="inline-flex w-2 shrink-0 rounded-full aspect-square"
-                        style={{ backgroundColor: getPlannedTypeColor(session.type) }}
-                      />
-                      <span className="truncate text-[11px] font-medium">
-                        {getPlannedTypeLabel(session.type)}
-                      </span>
-                    </div>
-                    <div className="mt-0.5 text-[10px] tabular-nums text-muted-foreground">
-                      {formatMinutes(session.durationMinutes)}
-                      {session.distanceKm ? ` · ${session.distanceKm}km` : ''}
-                    </div>
-                    {session.thresholdMinutes > 0 && (
-                      <div className="text-[10px] tabular-nums" style={{ color: 'var(--red)' }}>
-                        역치 {session.thresholdMinutes}분
+              <div className="flex flex-1 flex-col gap-1 p-1.5">
+                {daySessions.length === 0 ? (
+                  <span className="flex flex-1 items-center justify-center gap-1">
+                    <Icon icon={Plus} size="xsm" color="disabled" />
+                    <Text color="disabled" size="sm">
+                      휴식
+                    </Text>
+                  </span>
+                ) : (
+                  daySessions.map((session) => (
+                    <div key={session.id} className="rounded-md bg-surface px-1.5 py-1">
+                      <div className="flex items-center gap-1">
+                        <span
+                          aria-hidden
+                          className="inline-flex w-2 shrink-0 rounded-full aspect-square"
+                          style={{ backgroundColor: getPlannedTypeColor(session.type) }}
+                        />
+                        <Text type="label" size="sm" maxLines={1}>
+                          {getPlannedTypeLabel(session.type)}
+                        </Text>
                       </div>
-                    )}
-                    {session.supraMinutes > 0 && (
-                      <div className="text-[10px] tabular-nums" style={{ color: 'var(--purple)' }}>
-                        Z3 {session.supraMinutes}분
-                      </div>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-          </button>
-        )
-      })}
-    </div>
+                      <Text type="supporting" size="xsm" hasTabularNumbers display="block">
+                        {formatMinutes(session.durationMinutes)}
+                        {session.distanceKm ? ` · ${session.distanceKm}km` : ''}
+                      </Text>
+                      {session.thresholdMinutes > 0 && (
+                        <Text
+                          size="xsm"
+                          hasTabularNumbers
+                          display="block"
+                          style={{ color: 'var(--color-data-categorical-red)' }}
+                        >
+                          역치 {session.thresholdMinutes}분
+                        </Text>
+                      )}
+                      {session.supraMinutes > 0 && (
+                        <Text
+                          size="xsm"
+                          hasTabularNumbers
+                          display="block"
+                          style={{ color: 'var(--color-data-categorical-purple)' }}
+                        >
+                          Z3 {session.supraMinutes}분
+                        </Text>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </button>
+          )
+        })}
+      </div>
+    </Card>
   )
 }

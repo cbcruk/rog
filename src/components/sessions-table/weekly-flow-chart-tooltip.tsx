@@ -1,3 +1,5 @@
+import { Card } from '@astryxdesign/core/Card'
+import { Text } from '@astryxdesign/core/Text'
 import type { FlowDataPoint } from './sessions-table.types'
 
 export function WeeklyFlowChartTooltip({
@@ -16,12 +18,18 @@ export function WeeklyFlowChartTooltip({
   if (data.distance === 0) return null
 
   return (
-    <div className="rounded-lg border bg-muted px-3 py-2 text-xs shadow-md tabular-nums">
-      <div className="font-medium">{data.type}</div>
-      <div className="mt-1 flex flex-col gap-0.5 text-muted-foreground">
-        <span>{data.distance} km</span>
-        {data.avgHR && <span>HR {data.avgHR} bpm</span>}
-      </div>
-    </div>
+    <Card padding={2} elevation="med">
+      <Text type="label" display="block">
+        {data.type}
+      </Text>
+      <Text type="supporting" hasTabularNumbers display="block">
+        {data.distance} km
+      </Text>
+      {data.avgHR && (
+        <Text type="supporting" hasTabularNumbers display="block">
+          HR {data.avgHR} bpm
+        </Text>
+      )}
+    </Card>
   )
 }

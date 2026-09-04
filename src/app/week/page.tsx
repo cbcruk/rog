@@ -1,6 +1,7 @@
-import Link from 'next/link'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { Heading } from '@astryxdesign/core/Heading'
+import { Text } from '@astryxdesign/core/Text'
 import { WeekCompareGrid } from '@/components/week-view/week-compare-grid'
+import { WeekNav } from '@/components/week-view/week-nav'
 import { WeekProgressPanel } from '@/components/week-view/week-progress-panel'
 import { getActiveProgram } from '@/lib/program'
 import { getAllSessions } from '@/lib/sessions'
@@ -11,13 +12,6 @@ export const dynamic = 'force-dynamic'
 /** 이동 가능한 주 범위. 과거는 1년, 미래는 계획 확인용으로 4주까지 허용한다. */
 const MIN_OFFSET = -52
 const MAX_OFFSET = 4
-
-/**
- * 주 이동 링크 스타일.
- * `buttonVariants`는 클라이언트 모듈이라 서버 컴포넌트에서 호출할 수 없어 outline 버튼 모양을 직접 맞춘다.
- */
-const NAV_LINK_CLASS =
-  'inline-flex items-center justify-center rounded-lg border border-border bg-background font-medium transition-colors hover:bg-muted'
 
 function parseOffset(value: string | undefined): number {
   const parsed = Number(value)
@@ -48,36 +42,14 @@ export default async function WeekPage({
     <div className="flex flex-col gap-4 p-4 lg:p-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-col gap-0.5">
-          <h1 className="text-xl font-bold">
-            {offset === 0 ? '이번 주' : formatWeekLabel(monday)}
-          </h1>
-          <p className="text-sm text-muted-foreground">
+          <Heading level={1}>{offset === 0 ? '이번 주' : formatWeekLabel(monday)}</Heading>
+          <Text color="secondary" display="block">
             {offset === 0 && `${formatWeekLabel(monday)} · `}
             {program ? `적용 중: ${program.name}` : '적용 중인 프로그램 없음'}
-          </p>
+          </Text>
         </div>
 
-        <div className="flex items-center gap-1">
-          <Link
-            href={`/week?offset=${Math.max(MIN_OFFSET, offset - 1)}`}
-            aria-label="이전 주"
-            className={`${NAV_LINK_CLASS} size-7`}
-          >
-            <ChevronLeft className="size-3.5" />
-          </Link>
-          {offset !== 0 && (
-            <Link href="/week" className={`${NAV_LINK_CLASS} h-7 px-2.5 text-[0.8rem]`}>
-              이번 주
-            </Link>
-          )}
-          <Link
-            href={`/week?offset=${Math.min(MAX_OFFSET, offset + 1)}`}
-            aria-label="다음 주"
-            className={`${NAV_LINK_CLASS} size-7`}
-          >
-            <ChevronRight className="size-3.5" />
-          </Link>
-        </div>
+        <WeekNav offset={offset} minOffset={MIN_OFFSET} maxOffset={MAX_OFFSET} />
       </div>
 
       <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">

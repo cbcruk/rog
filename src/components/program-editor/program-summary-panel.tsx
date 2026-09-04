@@ -1,5 +1,7 @@
 'use client'
 
+import { Card } from '@astryxdesign/core/Card'
+import { Text } from '@astryxdesign/core/Text'
 import type { ProgramTotals } from '@/types/program'
 import { formatMinutes } from './program-editor.utils'
 
@@ -23,12 +25,19 @@ function StatCell({
   unit?: string
 }): React.ReactElement {
   return (
-    <div className="flex flex-col bg-background px-3 py-2">
-      <span className="text-[11px] text-muted-foreground">{label}</span>
-      <span className="text-sm font-semibold tabular-nums">
+    <div className="flex flex-col">
+      <Text type="supporting" size="xsm" display="block">
+        {label}
+      </Text>
+      <Text weight="semibold" hasTabularNumbers display="block">
         {value}
-        {unit && <span className="ml-0.5 text-xs font-normal text-muted-foreground">{unit}</span>}
-      </span>
+        {unit && (
+          <Text type="supporting" size="sm">
+            {' '}
+            {unit}
+          </Text>
+        )}
+      </Text>
     </div>
   )
 }
@@ -39,29 +48,35 @@ function StatCell({
  */
 export function ProgramSummaryPanel({ totals }: ProgramSummaryPanelProps): React.ReactElement {
   const bands: ZoneBand[] = [
-    { label: '이지', minutes: totals.easyMinutes, color: 'var(--green)' },
-    { label: '역치', minutes: totals.thresholdMinutes, color: 'var(--red)' },
-    { label: 'Z3 초과', minutes: totals.supraMinutes, color: 'var(--purple)' },
+    { label: '이지', minutes: totals.easyMinutes, color: 'var(--color-data-categorical-green)' },
+    { label: '역치', minutes: totals.thresholdMinutes, color: 'var(--color-data-categorical-red)' },
+    {
+      label: 'Z3 초과',
+      minutes: totals.supraMinutes,
+      color: 'var(--color-data-categorical-purple)',
+    },
   ]
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border bg-border">
-        <StatCell label="계획 거리" value={totals.totalDistance.toFixed(1)} unit="km" />
-        <StatCell label="계획 시간" value={formatMinutes(totals.totalMinutes)} />
-        <StatCell label="예상 TSS" value={String(totals.estimatedTSS)} />
-        <StatCell label="세션" value={`${totals.sessionCount}회 / ${totals.trainingDays}일`} />
-      </div>
+      <Card padding={3}>
+        <div className="grid grid-cols-2 gap-3">
+          <StatCell label="계획 거리" value={totals.totalDistance.toFixed(1)} unit="km" />
+          <StatCell label="계획 시간" value={formatMinutes(totals.totalMinutes)} />
+          <StatCell label="예상 TSS" value={String(totals.estimatedTSS)} />
+          <StatCell label="세션" value={`${totals.sessionCount}회 / ${totals.trainingDays}일`} />
+        </div>
+      </Card>
 
-      <div className="rounded-lg border p-3">
-        <div className="flex items-baseline justify-between">
-          <span className="text-xs font-medium">강도 분포</span>
-          <span className="text-xs tabular-nums text-muted-foreground">
+      <Card padding={3}>
+        <div className="flex items-baseline justify-between gap-2">
+          <Text type="label">강도 분포</Text>
+          <Text type="supporting" hasTabularNumbers>
             이지 {totals.easyPercent}%
-          </span>
+          </Text>
         </div>
 
-        <div className="mt-2 flex h-2 overflow-hidden rounded-full bg-muted">
+        <div className="mt-2 flex h-2 overflow-hidden rounded-full bg-track">
           {totals.totalMinutes > 0 &&
             bands.map((band) => (
               <div
@@ -76,17 +91,22 @@ export function ProgramSummaryPanel({ totals }: ProgramSummaryPanelProps): React
 
         <div className="mt-2 flex flex-col gap-1">
           {bands.map((band) => (
-            <div key={band.label} className="flex items-center gap-1.5 text-[11px]">
+            <div key={band.label} className="flex items-center gap-1.5">
               <span
+                aria-hidden
                 className="inline-flex w-2 rounded-full aspect-square"
                 style={{ backgroundColor: band.color }}
               />
-              <span className="text-muted-foreground">{band.label}</span>
-              <span className="ml-auto tabular-nums">{band.minutes}분</span>
+              <Text type="supporting" size="sm">
+                {band.label}
+              </Text>
+              <Text size="sm" hasTabularNumbers className="ml-auto">
+                {band.minutes}분
+              </Text>
             </div>
           ))}
         </div>
-      </div>
+      </Card>
     </div>
   )
 }

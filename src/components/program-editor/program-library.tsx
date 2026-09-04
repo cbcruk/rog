@@ -1,7 +1,10 @@
 'use client'
 
 import { Star, Trash2 } from 'lucide-react'
-import { buttonVariants } from '@/components/ui/button'
+import { Card } from '@astryxdesign/core/Card'
+import { Icon } from '@astryxdesign/core/Icon'
+import { IconButton } from '@astryxdesign/core/IconButton'
+import { Text } from '@astryxdesign/core/Text'
 import type { WeeklyProgram } from '@/types/program'
 
 interface ProgramLibraryProps {
@@ -22,48 +25,54 @@ export function ProgramLibrary({
 }: ProgramLibraryProps): React.ReactElement {
   if (programs.length === 0) {
     return (
-      <div className="rounded-lg border px-3 py-4 text-center text-xs text-muted-foreground">
-        저장된 프로그램이 없습니다.
-      </div>
+      <Card padding={3}>
+        <Text type="supporting" justify="center" display="block">
+          저장된 프로그램이 없습니다.
+        </Text>
+      </Card>
     )
   }
 
   return (
-    <ul className="flex flex-col divide-y overflow-hidden rounded-lg border">
-      {programs.map((program) => (
-        <li
-          key={program.id}
-          className={`flex items-center gap-2 px-3 py-2 ${
-            program.id === currentId ? 'bg-foreground/5' : ''
-          }`}
-        >
-          <button
-            type="button"
-            onClick={() => onLoad(program)}
-            disabled={disabled}
-            className="flex min-w-0 flex-1 flex-col text-left disabled:opacity-50"
+    <Card padding={0}>
+      <ul className="flex flex-col">
+        {programs.map((program) => (
+          <li
+            key={program.id}
+            className={`flex items-center gap-2 border-b border-border px-3 py-2 last:border-b-0 ${
+              program.id === currentId ? 'bg-muted' : ''
+            }`}
           >
-            <span className="flex items-center gap-1 truncate text-xs font-medium">
-              {program.isActive && (
-                <Star className="size-3 shrink-0" style={{ color: 'var(--yellow)' }} />
-              )}
-              {program.name}
-            </span>
-            <span className="truncate text-[11px] text-muted-foreground">
-              {program.sessions.length}개 세션
-            </span>
-          </button>
-          <button
-            type="button"
-            onClick={() => onDelete(program.id)}
-            disabled={disabled}
-            aria-label={`${program.name} 삭제`}
-            className={buttonVariants({ variant: 'ghost', size: 'icon-sm' })}
-          >
-            <Trash2 />
-          </button>
-        </li>
-      ))}
-    </ul>
+            <button
+              type="button"
+              onClick={() => onLoad(program)}
+              disabled={disabled}
+              className="flex min-w-0 flex-1 flex-col text-left disabled:opacity-50"
+            >
+              <span className="flex items-center gap-1">
+                {program.isActive && (
+                  <Icon icon={Star} size="xsm" color="warning" label="적용 중" />
+                )}
+                <Text type="label" size="sm" maxLines={1}>
+                  {program.name}
+                </Text>
+              </span>
+              <Text type="supporting" size="sm" maxLines={1} display="block">
+                {program.sessions.length}개 세션
+              </Text>
+            </button>
+            <IconButton
+              label={`${program.name} 삭제`}
+              tooltip="삭제"
+              variant="ghost"
+              size="sm"
+              isDisabled={disabled}
+              icon={<Icon icon={Trash2} size="sm" />}
+              onClick={() => onDelete(program.id)}
+            />
+          </li>
+        ))}
+      </ul>
+    </Card>
   )
 }

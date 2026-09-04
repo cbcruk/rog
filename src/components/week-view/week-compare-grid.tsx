@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import { Card } from '@astryxdesign/core/Card'
+import { Text } from '@astryxdesign/core/Text'
 import {
   getPlannedTypeColor,
   getPlannedTypeLabel,
@@ -30,25 +32,31 @@ function EntryCard({ entry, isPast }: { entry: WeekEntry; isPast: boolean }): Re
     return (
       <div
         className={`rounded-md border border-dashed px-1.5 py-1 ${
-          isPast ? 'border-destructive/40' : 'border-border'
+          isPast ? 'border-error' : 'border-border'
         }`}
       >
         <div className="flex items-center gap-1">
           <span
+            aria-hidden
             className="inline-flex w-2 shrink-0 rounded-full opacity-40 aspect-square"
             style={{ backgroundColor: getPlannedTypeColor(planned.type) }}
           />
-          <span className="truncate text-[11px] text-muted-foreground">
+          <Text type="supporting" size="sm" maxLines={1}>
             {getPlannedTypeLabel(planned.type)}
-          </span>
+          </Text>
         </div>
-        <div className="mt-0.5 text-[10px] tabular-nums text-muted-foreground/70">
+        <Text type="supporting" size="xsm" hasTabularNumbers display="block">
           {formatMinutes(planned.durationMinutes)}
           {planned.distanceKm ? ` · ${planned.distanceKm}km` : ''}
-        </div>
-        <div className={`text-[10px] ${isPast ? 'text-destructive' : 'text-muted-foreground/60'}`}>
+        </Text>
+        <Text
+          size="xsm"
+          display="block"
+          color={isPast ? undefined : 'disabled'}
+          style={isPast ? { color: 'var(--color-error)' } : undefined}
+        >
           {isPast ? '미실시' : '예정'}
-        </div>
+        </Text>
       </div>
     )
   }
@@ -65,25 +73,30 @@ function EntryCard({ entry, isPast }: { entry: WeekEntry; isPast: boolean }): Re
   return (
     <Link
       href={`/sessions/${actual.id}`}
-      className="block rounded-md bg-background px-1.5 py-1 transition-colors hover:bg-foreground/5"
+      className="block rounded-md bg-surface px-1.5 py-1 transition-colors hover:bg-muted"
     >
       <div className="flex items-center gap-1">
         <span
+          aria-hidden
           className="inline-flex w-2 shrink-0 rounded-full aspect-square"
           style={{ backgroundColor: getSessionTypeColor(label) }}
         />
-        <span className="truncate text-[11px] font-medium">{label}</span>
+        <Text type="label" size="sm" maxLines={1}>
+          {label}
+        </Text>
       </div>
-      <div className="mt-0.5 text-[10px] tabular-nums text-muted-foreground">
+      <Text type="supporting" size="xsm" hasTabularNumbers display="block">
         {formatMinutes(actualMinutes)} · {actual.summary.distance}km
-      </div>
+      </Text>
       {status === 'unplanned' ? (
-        <div className="text-[10px] text-muted-foreground/60">계획 외</div>
+        <Text color="disabled" size="xsm" display="block">
+          계획 외
+        </Text>
       ) : (
         (distanceDelta || timeDelta) && (
-          <div className="text-[10px] tabular-nums text-muted-foreground/60">
+          <Text color="disabled" size="xsm" hasTabularNumbers display="block">
             계획 대비 {[distanceDelta, timeDelta].filter(Boolean).join(' · ')}
-          </div>
+          </Text>
         )
       )}
     </Link>
@@ -96,38 +109,46 @@ function EntryCard({ entry, isPast }: { entry: WeekEntry; isPast: boolean }): Re
  */
 export function WeekCompareGrid({ days }: WeekCompareGridProps): React.ReactElement {
   return (
-    <div className="grid grid-cols-7 overflow-hidden rounded-lg border bg-muted">
-      {days.map((day) => (
-        <div
-          key={day.date}
-          className={`flex min-h-32 flex-col ${day.dayIndex < 6 ? 'border-r' : ''} ${
-            day.isToday ? 'bg-foreground/5' : ''
-          }`}
-        >
-          <div className="border-b px-2 py-1 text-center">
-            <div className="text-[10px] text-muted-foreground">{day.dayLabel}</div>
-            <div
-              className={`text-xs tabular-nums ${
-                day.isToday ? 'font-semibold text-foreground' : 'text-muted-foreground/60'
-              }`}
-            >
-              {day.dateNum}
+    <Card padding={0}>
+      <div className="grid grid-cols-7">
+        {days.map((day) => (
+          <div
+            key={day.date}
+            className={`flex min-h-32 flex-col ${
+              day.dayIndex < 6 ? 'border-r border-border' : ''
+            } ${day.isToday ? 'bg-muted' : ''}`}
+          >
+            <div className="border-b border-border px-2 py-1 text-center">
+              <Text type="supporting" size="xsm" display="block">
+                {day.dayLabel}
+              </Text>
+              <Text
+                size="sm"
+                display="block"
+                hasTabularNumbers
+                weight={day.isToday ? 'semibold' : undefined}
+                color={day.isToday ? 'primary' : 'disabled'}
+              >
+                {day.dateNum}
+              </Text>
+            </div>
+
+            <div className="flex flex-1 flex-col gap-1 p-1.5">
+              {day.entries.length === 0 ? (
+                <span className="flex flex-1 items-center justify-center">
+                  <Text color="disabled" size="sm">
+                    휴식
+                  </Text>
+                </span>
+              ) : (
+                day.entries.map((entry) => (
+                  <EntryCard key={entry.key} entry={entry} isPast={day.isPast} />
+                ))
+              )}
             </div>
           </div>
-
-          <div className="flex flex-1 flex-col gap-1 p-1.5">
-            {day.entries.length === 0 ? (
-              <span className="flex flex-1 items-center justify-center text-[11px] text-muted-foreground/40">
-                휴식
-              </span>
-            ) : (
-              day.entries.map((entry) => (
-                <EntryCard key={entry.key} entry={entry} isPast={day.isPast} />
-              ))
-            )}
-          </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+    </Card>
   )
 }

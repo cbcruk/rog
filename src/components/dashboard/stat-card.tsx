@@ -1,3 +1,6 @@
+import { Card } from '@astryxdesign/core/Card'
+import { Text } from '@astryxdesign/core/Text'
+
 interface StatCardProps {
   /** 통계 항목 이름. 툴팁 등 ReactNode 합성도 가능 */
   label: React.ReactNode
@@ -20,11 +23,19 @@ export function StatCard({
   children,
 }: StatCardProps): React.ReactElement {
   return (
-    <div className="relative rounded-lg border bg-muted p-4">
-      <div className="mb-1 text-sm text-muted-foreground">{label}</div>
-      <div className="text-2xl font-bold">{value}</div>
-      {description && <div className="mt-1 text-xs text-muted-foreground">{description}</div>}
-      <div className="absolute top-4 right-4">{children}</div>
-    </div>
+    <Card>
+      <div className="flex items-start justify-between gap-2">
+        <Text type="supporting">{label}</Text>
+        {children}
+      </div>
+      <Text size="2xl" weight="bold" display="block" hasTabularNumbers>
+        {value}
+      </Text>
+      {description && (
+        <Text size="sm" color="secondary" display="block">
+          {description}
+        </Text>
+      )}
+    </Card>
   )
 }
