@@ -102,14 +102,14 @@ describe('getSessionTypeVariant', () => {
 })
 
 describe('getSessionTypeColor', () => {
-  it('라벨에 해당하는 CSS 변수를 반환한다', () => {
-    expect(getSessionTypeColor('이지')).toBe('var(--green)')
-    expect(getSessionTypeColor('역치')).toBe('var(--red)')
-    expect(getSessionTypeColor('롱런')).toBe('var(--blue)')
+  it('라벨에 해당하는 데이터 시각화 토큰을 반환한다', () => {
+    expect(getSessionTypeColor('이지')).toBe('var(--color-data-categorical-green)')
+    expect(getSessionTypeColor('역치')).toBe('var(--color-data-categorical-red)')
+    expect(getSessionTypeColor('롱런')).toBe('var(--color-data-categorical-blue)')
   })
 
-  it('매칭되지 않으면 tx-2 색상을 반환한다', () => {
-    expect(getSessionTypeColor('unknown')).toBe('var(--muted-foreground)')
+  it('매칭되지 않으면 보조 텍스트 색상을 반환한다', () => {
+    expect(getSessionTypeColor('unknown')).toBe('var(--color-text-secondary)')
   })
 })
 

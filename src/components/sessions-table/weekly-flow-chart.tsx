@@ -11,9 +11,13 @@ import {
   Cell,
   Tooltip as RechartsTooltip,
 } from 'recharts'
+import { Card } from '@astryxdesign/core/Card'
+import { CHART_CHROME_COLOR, PMC_SERIES_COLOR } from '@/components/pmc-chart/pmc-chart.colors'
 import type { WeekGroup } from './sessions-table.types'
 import { buildWeekFlowData, getWeekRange } from './sessions-table.utils'
 import { WeeklyFlowChartTooltip } from './weekly-flow-chart-tooltip'
+
+const AXIS_TICK = { fontSize: 11, fill: CHART_CHROME_COLOR.axis }
 
 export function WeeklyFlowChart({ group }: { group: WeekGroup }): React.ReactElement {
   const data = useMemo(() => {
@@ -23,14 +27,14 @@ export function WeeklyFlowChart({ group }: { group: WeekGroup }): React.ReactEle
   const maxDistance = Math.max(...data.map((d) => d.distance))
 
   return (
-    <div className="rounded-lg border bg-muted p-3">
+    <Card padding={3}>
       <ResponsiveContainer width="100%" height={120}>
         <ComposedChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-          <XAxis dataKey="day" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+          <XAxis dataKey="day" tick={AXIS_TICK} tickLine={false} axisLine={false} />
           <YAxis
             yAxisId="distance"
             domain={[0, Math.ceil(maxDistance * 1.2)]}
-            tick={{ fontSize: 10 }}
+            tick={{ ...AXIS_TICK, fontSize: 10 }}
             tickLine={false}
             axisLine={false}
             width={40}
@@ -46,13 +50,13 @@ export function WeeklyFlowChart({ group }: { group: WeekGroup }): React.ReactEle
             yAxisId="hr"
             dataKey="avgHR"
             type="monotone"
-            stroke="var(--red)"
+            stroke={PMC_SERIES_COLOR.atl}
             strokeWidth={1.5}
-            dot={{ r: 2.5, fill: 'var(--red)' }}
+            dot={{ r: 2.5, fill: PMC_SERIES_COLOR.atl }}
             connectNulls
           />
         </ComposedChart>
       </ResponsiveContainer>
-    </div>
+    </Card>
   )
 }

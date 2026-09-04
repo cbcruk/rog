@@ -1,6 +1,10 @@
 'use client'
 
 import { AlertTriangle, Check, X } from 'lucide-react'
+import { Card } from '@astryxdesign/core/Card'
+import { Divider } from '@astryxdesign/core/Divider'
+import { Icon } from '@astryxdesign/core/Icon'
+import { Text } from '@astryxdesign/core/Text'
 import type { ProgramCheck } from '@/types/program'
 
 interface ProgramChecklistProps {
@@ -8,9 +12,9 @@ interface ProgramChecklistProps {
 }
 
 const STATUS_STYLE = {
-  pass: { icon: Check, color: 'var(--green)' },
-  warn: { icon: AlertTriangle, color: 'var(--yellow)' },
-  fail: { icon: X, color: 'var(--red)' },
+  pass: { icon: Check, color: 'success' },
+  warn: { icon: AlertTriangle, color: 'warning' },
+  fail: { icon: X, color: 'error' },
 } as const
 
 /**
@@ -22,33 +26,39 @@ export function ProgramChecklist({ checks }: ProgramChecklistProps): React.React
   const warnCount = checks.filter((check) => check.status === 'warn').length
 
   return (
-    <div className="rounded-lg border">
-      <div className="flex items-baseline justify-between border-b px-3 py-2">
-        <span className="text-xs font-medium">모델 검증</span>
-        <span className="text-[11px] tabular-nums text-muted-foreground">
+    <Card padding={3}>
+      <div className="flex items-baseline justify-between gap-2">
+        <Text type="label">모델 검증</Text>
+        <Text type="supporting" hasTabularNumbers>
           {failCount > 0 || warnCount > 0
             ? `위반 ${failCount} · 주의 ${warnCount}`
             : `${checks.length}개 항목 통과`}
-        </span>
+        </Text>
       </div>
 
-      <ul className="flex flex-col divide-y">
+      <Divider />
+
+      <ul className="flex flex-col gap-2">
         {checks.map((check) => {
-          const { icon: Icon, color } = STATUS_STYLE[check.status]
+          const { icon, color } = STATUS_STYLE[check.status]
 
           return (
-            <li key={check.id} className="flex items-start gap-2 px-3 py-2">
-              <Icon className="mt-0.5 size-3.5 shrink-0" style={{ color }} />
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[11px] font-medium">{check.label}</span>
-                <span className="text-[11px] leading-snug text-muted-foreground">
+            <li key={check.id} className="flex items-start gap-2">
+              <span className="mt-0.5 shrink-0">
+                <Icon icon={icon} size="xsm" color={color} label={check.status} />
+              </span>
+              <div className="flex flex-col">
+                <Text type="label" size="sm">
+                  {check.label}
+                </Text>
+                <Text type="supporting" size="sm" display="block">
                   {check.message}
-                </span>
+                </Text>
               </div>
             </li>
           )
         })}
       </ul>
-    </div>
+    </Card>
   )
 }

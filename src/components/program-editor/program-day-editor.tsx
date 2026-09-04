@@ -1,7 +1,15 @@
 'use client'
 
 import { Plus, Trash2 } from 'lucide-react'
-import { buttonVariants } from '@/components/ui/button'
+import { Button } from '@astryxdesign/core/Button'
+import { Card } from '@astryxdesign/core/Card'
+import { Heading } from '@astryxdesign/core/Heading'
+import { Icon } from '@astryxdesign/core/Icon'
+import { IconButton } from '@astryxdesign/core/IconButton'
+import { NumberInput } from '@astryxdesign/core/NumberInput'
+import { Selector } from '@astryxdesign/core/Selector'
+import { Text } from '@astryxdesign/core/Text'
+import { TextInput } from '@astryxdesign/core/TextInput'
 import type { PlannedSession, PlannedSessionType } from '@/types/program'
 import {
   DAY_LABELS,
@@ -18,40 +26,10 @@ interface ProgramDayEditorProps {
   onAdd: () => void
 }
 
-const inputClass =
-  'w-full rounded-md border bg-muted px-2 py-1.5 text-sm tabular-nums focus:border-foreground focus:outline-none'
-
-interface NumberFieldProps {
-  label: string
-  unit: string
-  value: number
-  step?: number
-  onChange: (value: number) => void
-}
-
-function NumberField({
-  label,
-  unit,
-  value,
-  step = 1,
-  onChange,
-}: NumberFieldProps): React.ReactElement {
-  return (
-    <label className="flex flex-col gap-1">
-      <span className="text-[11px] text-muted-foreground">
-        {label} <span className="text-muted-foreground/60">({unit})</span>
-      </span>
-      <input
-        type="number"
-        min={0}
-        step={step}
-        value={value}
-        onChange={(event) => onChange(Math.max(0, Number(event.target.value) || 0))}
-        className={inputClass}
-      />
-    </label>
-  )
-}
+const TYPE_OPTIONS = PLANNED_TYPE_OPTIONS.map((type) => ({
+  value: type,
+  label: getPlannedTypeLabel(type),
+}))
 
 /**
  * 선택한 요일에 배치된 계획 세션들을 편집하는 패널.
@@ -65,111 +43,123 @@ export function ProgramDayEditor({
   onAdd,
 }: ProgramDayEditorProps): React.ReactElement {
   return (
-    <div className="flex flex-col gap-3 rounded-lg border p-3">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold">{DAY_LABELS[dayIndex]}요일</h3>
-        <button
-          type="button"
-          onClick={onAdd}
-          className={buttonVariants({ variant: 'outline', size: 'sm' })}
-        >
-          <Plus />
-          세션 추가
-        </button>
+    <section className="flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-2">
+        <Heading level={3}>{DAY_LABELS[dayIndex]}요일</Heading>
+        <Button label="세션 추가" size="sm" icon={<Icon icon={Plus} size="sm" />} onClick={onAdd} />
       </div>
 
       {sessions.length === 0 ? (
-        <p className="py-4 text-center text-xs text-muted-foreground">
+        <Text type="supporting" justify="center" display="block">
           휴식일입니다. 세션을 추가하면 이 날에 배치됩니다.
-        </p>
+        </Text>
       ) : (
-        sessions.map((session, index) => {
-          const zoneOverflow = session.thresholdMinutes + session.supraMinutes
+        <div className="flex flex-col gap-3">
+          {sessions.map((session, index) => {
+            const zoneOverflow = session.thresholdMinutes + session.supraMinutes
+            const isOverflowing = zoneOverflow > session.durationMinutes
 
-          return (
-            <div key={session.id} className="flex flex-col gap-3 rounded-md border bg-muted/30 p-3">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-xs text-muted-foreground">
-                  세션 {index + 1} · {getPlannedTypeLabel(session.type)}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => onRemove(session.id)}
-                  aria-label="세션 삭제"
-                  className={buttonVariants({ variant: 'destructive', size: 'icon-sm' })}
-                >
-                  <Trash2 />
-                </button>
-              </div>
+            return (
+              <Card key={session.id} variant="muted" padding={3}>
+                <div className="flex items-center justify-between gap-2">
+                  <Text type="supporting">
+                    세션 {index + 1} · {getPlannedTypeLabel(session.type)}
+                  </Text>
+                  <IconButton
+                    label="세션 삭제"
+                    tooltip="세션 삭제"
+                    variant="destructive"
+                    size="sm"
+                    icon={<Icon icon={Trash2} size="sm" />}
+                    onClick={() => onRemove(session.id)}
+                  />
+                </div>
 
-              <label className="flex flex-col gap-1">
-                <span className="text-[11px] text-muted-foreground">유형</span>
-                <select
-                  value={session.type}
-                  onChange={(event) =>
-                    onChange(applyTypeDefaults(session, event.target.value as PlannedSessionType))
-                  }
-                  className={inputClass}
-                >
-                  {PLANNED_TYPE_OPTIONS.map((type) => (
-                    <option key={type} value={type}>
-                      {getPlannedTypeLabel(type)}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                <div className="mt-3 flex flex-col gap-3">
+                  <Selector
+                    label="유형"
+                    size="sm"
+                    width="100%"
+                    options={TYPE_OPTIONS}
+                    value={session.type}
+                    onChange={(value) =>
+                      onChange(applyTypeDefaults(session, value as PlannedSessionType))
+                    }
+                  />
 
-              <div className="grid grid-cols-2 gap-2">
-                <NumberField
-                  label="시간"
-                  unit="분"
-                  value={session.durationMinutes}
-                  step={5}
-                  onChange={(value) => onChange({ ...session, durationMinutes: value })}
-                />
-                <NumberField
-                  label="거리"
-                  unit="km"
-                  value={session.distanceKm ?? 0}
-                  step={0.5}
-                  onChange={(value) => onChange({ ...session, distanceKm: value })}
-                />
-                <NumberField
-                  label="역치 존"
-                  unit="분"
-                  value={session.thresholdMinutes}
-                  step={5}
-                  onChange={(value) => onChange({ ...session, thresholdMinutes: value })}
-                />
-                <NumberField
-                  label="Z3 초과"
-                  unit="분"
-                  value={session.supraMinutes}
-                  step={1}
-                  onChange={(value) => onChange({ ...session, supraMinutes: value })}
-                />
-              </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <NumberInput
+                      label="시간"
+                      units="분"
+                      size="sm"
+                      width="100%"
+                      min={0}
+                      step={5}
+                      value={session.durationMinutes}
+                      onChange={(value) =>
+                        onChange({ ...session, durationMinutes: Math.max(0, value) })
+                      }
+                    />
+                    <NumberInput
+                      label="거리"
+                      units="km"
+                      size="sm"
+                      width="100%"
+                      min={0}
+                      step={0.5}
+                      value={session.distanceKm ?? 0}
+                      onChange={(value) => onChange({ ...session, distanceKm: Math.max(0, value) })}
+                    />
+                    <NumberInput
+                      label="역치 존"
+                      units="분"
+                      size="sm"
+                      width="100%"
+                      min={0}
+                      step={5}
+                      value={session.thresholdMinutes}
+                      onChange={(value) =>
+                        onChange({ ...session, thresholdMinutes: Math.max(0, value) })
+                      }
+                      status={
+                        isOverflowing
+                          ? {
+                              type: 'error',
+                              message: `존 시간 합(${zoneOverflow}분)이 세션 시간(${session.durationMinutes}분)을 넘습니다.`,
+                            }
+                          : undefined
+                      }
+                      statusVariant="detached"
+                    />
+                    <NumberInput
+                      label="Z3 초과"
+                      units="분"
+                      size="sm"
+                      width="100%"
+                      min={0}
+                      step={1}
+                      value={session.supraMinutes}
+                      onChange={(value) =>
+                        onChange({ ...session, supraMinutes: Math.max(0, value) })
+                      }
+                      status={isOverflowing ? { type: 'error' } : undefined}
+                    />
+                  </div>
 
-              {zoneOverflow > session.durationMinutes && (
-                <p className="text-[11px] text-destructive">
-                  존 시간 합({zoneOverflow}분)이 세션 시간({session.durationMinutes}분)을 넘습니다.
-                </p>
-              )}
-
-              <label className="flex flex-col gap-1">
-                <span className="text-[11px] text-muted-foreground">메모</span>
-                <input
-                  type="text"
-                  value={session.note ?? ''}
-                  placeholder="예: 6 x 5분 / 1분 조깅"
-                  onChange={(event) => onChange({ ...session, note: event.target.value })}
-                  className="w-full rounded-md border bg-muted px-2 py-1.5 text-sm focus:border-foreground focus:outline-none"
-                />
-              </label>
-            </div>
-          )
-        })
+                  <TextInput
+                    label="메모"
+                    size="sm"
+                    width="100%"
+                    placeholder="예: 6 x 5분 / 1분 조깅"
+                    value={session.note ?? ''}
+                    onChange={(value) => onChange({ ...session, note: value })}
+                  />
+                </div>
+              </Card>
+            )
+          })}
+        </div>
       )}
-    </div>
+    </section>
   )
 }

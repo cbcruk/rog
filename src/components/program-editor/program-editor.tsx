@@ -2,7 +2,13 @@
 
 import { useMemo, useState, useTransition } from 'react'
 import { Save } from 'lucide-react'
-import { buttonVariants } from '@/components/ui/button'
+import { Button } from '@astryxdesign/core/Button'
+import { CheckboxInput } from '@astryxdesign/core/CheckboxInput'
+import { Card } from '@astryxdesign/core/Card'
+import { FieldStatus } from '@astryxdesign/core/FieldStatus'
+import { Icon } from '@astryxdesign/core/Icon'
+import { Text } from '@astryxdesign/core/Text'
+import { TextInput } from '@astryxdesign/core/TextInput'
 import { deleteProgramAction, saveProgramAction } from '@/app/program/actions'
 import { calculateProgramTotals, groupSessionsByDay } from '@/lib/program-metrics'
 import { PROGRAM_PRESETS, instantiatePreset } from '@/lib/program-presets'
@@ -187,37 +193,32 @@ export function ProgramEditor({
   return (
     <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
       <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <input
-            type="text"
-            value={draft.name}
-            onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))}
-            placeholder="프로그램 이름"
-            aria-label="프로그램 이름"
-            className="min-w-48 flex-1 rounded-md border bg-muted px-3 py-2 text-sm font-medium focus:border-foreground focus:outline-none"
-          />
-          <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <input
-              type="checkbox"
-              checked={draft.isActive}
-              onChange={(event) =>
-                setDraft((current) => ({ ...current, isActive: event.target.checked }))
-              }
+        <div className="flex flex-wrap items-end gap-2">
+          <div className="min-w-48 flex-1">
+            <TextInput
+              label="프로그램 이름"
+              isLabelHidden
+              width="100%"
+              placeholder="프로그램 이름"
+              value={draft.name}
+              onChange={(value) => setDraft((current) => ({ ...current, name: value }))}
             />
-            현재 적용
-          </label>
-          <button
-            type="button"
+          </div>
+          <CheckboxInput
+            label="현재 적용"
+            value={draft.isActive}
+            onChange={(checked) => setDraft((current) => ({ ...current, isActive: checked }))}
+          />
+          <Button
+            label={isPending ? '저장 중...' : isDirty ? '저장 *' : '저장'}
+            variant="primary"
+            icon={<Icon icon={Save} size="sm" />}
+            isLoading={isPending}
             onClick={handleSave}
-            disabled={isPending}
-            className={buttonVariants({ variant: 'default' })}
-          >
-            <Save />
-            {isPending ? '저장 중...' : isDirty ? '저장 *' : '저장'}
-          </button>
+          />
         </div>
 
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && <FieldStatus type="error" message={error} variant="detached" />}
 
         <ProgramWeekGrid
           sessions={draft.sessions}
@@ -226,9 +227,11 @@ export function ProgramEditor({
         />
 
         {selectedDay === null ? (
-          <p className="rounded-lg border border-dashed px-3 py-6 text-center text-xs text-muted-foreground">
-            요일을 선택하면 해당 날의 세션을 편집할 수 있습니다.
-          </p>
+          <Card variant="muted">
+            <Text type="supporting" justify="center" display="block">
+              요일을 선택하면 해당 날의 세션을 편집할 수 있습니다.
+            </Text>
+          </Card>
         ) : (
           <ProgramDayEditor
             dayIndex={selectedDay}
@@ -245,24 +248,22 @@ export function ProgramEditor({
         <ProgramChecklist checks={checks} />
 
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-medium">프리셋</span>
+          <Text type="label">프리셋</Text>
           <div className="flex flex-wrap gap-1.5">
             {PROGRAM_PRESETS.map((preset) => (
-              <button
+              <Button
                 key={preset.id}
-                type="button"
-                title={preset.description}
+                label={preset.name}
+                size="sm"
+                tooltip={preset.description}
                 onClick={() => replaceDraft(presetToDraft(preset))}
-                className={buttonVariants({ variant: 'outline', size: 'sm' })}
-              >
-                {preset.name}
-              </button>
+              />
             ))}
           </div>
         </div>
 
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-medium">저장된 프로그램</span>
+          <Text type="label">저장된 프로그램</Text>
           <ProgramLibrary
             programs={programs}
             currentId={draft.id}

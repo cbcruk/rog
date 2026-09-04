@@ -1,8 +1,9 @@
 'use client'
 
-import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { BarChart3, CalendarCheck, CalendarRange, ClipboardList, Settings } from 'lucide-react'
+import { TopNav, TopNavHeading, TopNavItem } from '@astryxdesign/core/TopNav'
+import { Icon } from '@astryxdesign/core/Icon'
 
 const navItems = [
   { href: '/dashboard', label: '대시보드', icon: BarChart3 },
@@ -20,27 +21,18 @@ export function Nav(): React.ReactElement {
   const pathname = usePathname()
 
   return (
-    <nav className="sticky top-0 z-50 border-b bg-background">
-      <div className="flex h-12 items-center gap-1 px-4 lg:px-6">
-        {navItems.map(({ href, label, icon: Icon }) => {
-          const active = pathname.startsWith(href)
-
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors ${
-                active
-                  ? 'bg-foreground/10 font-medium text-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <Icon className="size-4" />
-              {label}
-            </Link>
-          )
-        })}
-      </div>
-    </nav>
+    <TopNav
+      label="주요 메뉴"
+      heading={<TopNavHeading>러닝 다이어리</TopNavHeading>}
+      startContent={navItems.map(({ href, label, icon }) => (
+        <TopNavItem
+          key={href}
+          href={href}
+          label={label}
+          icon={<Icon icon={icon} size="sm" />}
+          isSelected={pathname.startsWith(href)}
+        />
+      ))}
+    />
   )
 }

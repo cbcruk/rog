@@ -1,4 +1,4 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip } from '@astryxdesign/core/Tooltip'
 
 interface TermLabelProps {
   /** 표시할 용어 텍스트 */
@@ -8,19 +8,13 @@ interface TermLabelProps {
 }
 
 /**
- * 점선 밑줄과 함께 용어를 표시하고 hover 시 정의를 툴팁으로 보여줍니다.
+ * 용어를 표시하고 hover 시 정의를 툴팁으로 보여줍니다.
+ * 점선 밑줄(hover 힌트)은 Tooltip이 직접 그립니다.
  */
 export function TermLabel({ term, definition }: TermLabelProps): React.ReactElement {
   return (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <span className="cursor-help underline decoration-dotted decoration-muted-foreground/50 underline-offset-4" />
-        }
-      >
-        {term}
-      </TooltipTrigger>
-      <TooltipContent>{definition}</TooltipContent>
+    <Tooltip content={definition} touchTrigger="tap">
+      <span>{term}</span>
     </Tooltip>
   )
 }
