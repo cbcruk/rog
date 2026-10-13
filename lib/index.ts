@@ -1,9 +1,10 @@
 import { readdirSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { join, basename } from 'path'
-import { parseFitFile } from './parser.ts'
+import { openFitDb, parseFitFile } from './parser.ts'
 import { analyzeRun } from './analyzer.ts'
 import { initDb, upsertSession, getAllSettings } from './db.ts'
 import { calculateAndStorePMC } from './pmc-calculator.ts'
+import type { DatabaseSync } from 'node:sqlite'
 type Analysis = ReturnType<typeof analyzeRun>
 
 const DATA_DIR = join(process.cwd(), 'data')
@@ -165,12 +166,16 @@ interface ProcessResult {
 }
 
 /** FIT 파일 하나를 파싱 → 분석 → JSON/마크다운 저장하는 전체 파이프라인을 실행한다. */
-function processFile(filePath: string, settings: Record<string, string> = {}): ProcessResult {
+function processFile(
+  fitDb: DatabaseSync,
+  filePath: string,
+  settings: Record<string, string> = {},
+): ProcessResult {
   const filename = basename(filePath)
   console.log(`\nProcessing: ${filename}`)
 
   try {
-    const data = parseFitFile(filePath)
+    const data = parseFitFile(fitDb, filePath)
     const analysis = analyzeRun({
       session: data.session,
       laps: data.laps,
@@ -255,14 +260,17 @@ async function main(): Promise<void> {
 
   console.log(`\nFound ${files.length} file(s)`)
 
+  const fitDb = openFitDb()
   const results: ProcessResult[] = []
   for (const file of files) {
-    const result = processFile(file, settings)
+    const result = processFile(fitDb, file, settings)
     results.push(result)
     if (result.success && result.analysis) {
       await upsertSession(result.analysis)
     }
   }
+
+  fitDb.close()
 
   const success = results.filter((r) => r.success).length
   const failed = results.filter((r) => !r.success).length

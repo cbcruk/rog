@@ -1,4 +1,4 @@
-import { parseFitFile } from './parser.ts'
+import { openFitDb, parseFitFile } from './parser.ts'
 import { formatPace, formatTime } from './analyzer.ts'
 import type { FitRecord, IntervalResult } from '@/types/running'
 
@@ -225,7 +225,9 @@ export function analyzeWorkoutStructure(records: FitRecord[]): WorkoutStructure 
 
 if (process.argv[1]?.includes('interval-detector')) {
   const filePath = process.argv[2] || './data/22010162419_ACTIVITY.fit'
-  const data = parseFitFile(filePath)
+  const fitDb = openFitDb()
+  const data = parseFitFile(fitDb, filePath)
+  fitDb.close()
 
   console.log('='.repeat(60))
   console.log('Interval Detection Analysis')
