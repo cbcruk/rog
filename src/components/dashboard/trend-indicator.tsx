@@ -1,4 +1,12 @@
+'use client'
+
+/*
+ * lucide 아이콘 컴포넌트를 Astryx `Icon`에 넘기려면 클라이언트 모듈이어야 한다.
+ * 서버 컴포넌트에서 넘기면 함수 참조가 RSC 경계를 넘지 못해 직렬화 오류가 난다.
+ */
+
 import { Minus, TrendingDown, TrendingUp } from 'lucide-react'
+import { Icon } from '@astryxdesign/core/Icon'
 
 interface TrendIndicatorProps {
   /** 변화량. 양수면 상승, 음수면 하락, 0이면 유지 */
@@ -18,8 +26,8 @@ export function TrendIndicator({
   period,
   subject,
 }: TrendIndicatorProps): React.ReactElement {
-  const Icon = value > 0 ? TrendingUp : value < 0 ? TrendingDown : Minus
-  const color = value > 0 ? 'text-green' : value < 0 ? 'text-red' : 'text-muted-foreground'
+  const icon = value > 0 ? TrendingUp : value < 0 ? TrendingDown : Minus
+  const color = value > 0 ? 'success' : value < 0 ? 'error' : 'secondary'
   const absValue = Math.abs(value).toFixed(1)
   const sentence =
     value === 0
@@ -27,8 +35,8 @@ export function TrendIndicator({
       : `${period} ${subject}가 ${absValue} ${value > 0 ? '증가했어요' : '감소했어요'}`
 
   return (
-    <span className={`inline-flex items-center gap-1 ${color}`}>
-      <Icon className="size-3.5" />
+    <span className="inline-flex items-center gap-1">
+      <Icon icon={icon} size="xsm" color={color} />
       <span>{sentence}</span>
     </span>
   )

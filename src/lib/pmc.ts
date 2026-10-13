@@ -242,6 +242,28 @@ export async function getRecommendationInput(
   }
 }
 
+/**
+ * 최근 4주 평균 주간 거리(km)를 반환한다.
+ * 프로그램 에디터에서 계획 볼륨이 최근 훈련량 대비 과한지 판정하는 기준선으로 사용한다.
+ * 세션 데이터가 아직 없으면 0을 반환해 호출부가 해당 검사를 건너뛸 수 있게 한다.
+ */
+export async function getFourWeekAvgDistance(): Promise<number> {
+  const fourWeeksAgo = new Date()
+  fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28)
+
+  try {
+    const db = createDbClient()
+    const result = await db.execute({
+      sql: `SELECT COALESCE(SUM(distance), 0) as dist FROM sessions WHERE date >= ?`,
+      args: [fourWeeksAgo.toISOString().split('T')[0]],
+    })
+
+    return Number(result.rows[0].dist) / 4
+  } catch {
+    return 0
+  }
+}
+
 /** 대시보드용 PMC 요약을 반환한다. 현재 CTL/ATL/TSB, 주간 TSS, 컨디션 상태, 7일/28일 CTL 추세를 포함한다. */
 export async function getPMCSummary(): Promise<PMCSummary | null> {
   const db = createDbClient()

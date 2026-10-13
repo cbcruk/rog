@@ -1,3 +1,5 @@
+import { Card } from '@astryxdesign/core/Card'
+import { Heading } from '@astryxdesign/core/Heading'
 import { PMCChart } from '@/components/pmc-chart/pmc-chart'
 import type { PMCDataPoint } from '@/types/pmc'
 
@@ -13,9 +15,11 @@ interface PMCChartCardProps {
  */
 export function PMCChartCard({ data }: PMCChartCardProps): React.ReactElement {
   return (
-    <div className="rounded-lg border bg-muted p-4">
-      <h2 className="mb-4 text-lg font-medium">훈련 관리 차트 (PMC)</h2>
-      <PMCChart data={data} height={350} />
-    </div>
+    <Card>
+      <Heading level={2}>훈련 관리 차트 (PMC)</Heading>
+      <div className="mt-4">
+        <PMCChart data={data} height={350} />
+      </div>
+    </Card>
   )
 }

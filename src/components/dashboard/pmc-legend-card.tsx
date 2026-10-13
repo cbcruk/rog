@@ -1,5 +1,8 @@
+import { Card } from '@astryxdesign/core/Card'
+import { Text } from '@astryxdesign/core/Text'
+
 interface PMCLegendCardProps {
-  /** 범례 도트에 적용할 Tailwind 배경색 클래스 */
+  /** 범례 도트 색. PMC 차트가 쓰는 데이터 시각화 토큰과 같은 값이어야 한다 */
   dotColor: string
   /** 지표 이름 (예: CTL, ATL, TSB) */
   label: string
@@ -20,13 +23,21 @@ export function PMCLegendCard({
   guide,
 }: PMCLegendCardProps): React.ReactElement {
   return (
-    <div className="rounded-lg border bg-muted p-4">
+    <Card>
       <div className="mb-2 flex items-center gap-2">
-        <div className={`size-3 rounded-full ${dotColor}`} />
-        <span className="text-sm font-medium">{label}</span>
+        <span
+          aria-hidden
+          className="inline-flex w-3 rounded-full aspect-square"
+          style={{ backgroundColor: dotColor }}
+        />
+        <Text type="label">{label}</Text>
       </div>
-      <p className="text-xs text-muted-foreground">{description}</p>
-      <p className="mt-1.5 text-xs text-muted-foreground/80">{guide}</p>
-    </div>
+      <Text type="supporting" display="block">
+        {description}
+      </Text>
+      <Text type="supporting" color="disabled" display="block">
+        {guide}
+      </Text>
+    </Card>
   )
 }

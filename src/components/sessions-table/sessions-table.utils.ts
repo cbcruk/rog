@@ -60,17 +60,23 @@ export function getSessionTypeVariant(label: string): SessionBadgeVariant {
   return SESSION_TYPE_VARIANTS[label] || 'outline'
 }
 
+/**
+ * 유형별 색은 Astryx의 데이터 시각화 전용 토큰에서 가져온다.
+ * UI 색(accent/status)과 달리 계열끼리 구분이 잘 되도록 조정된 팔레트라
+ * 캘린더 도트와 주간 차트 막대가 나란히 놓여도 서로 구별된다.
+ * 팔레트에 노랑이 없어 중강도는 주황 계열(brown)로 대신한다.
+ */
 const SESSION_TYPE_COLORS: Record<SessionBadgeVariant, string> = {
-  easy: 'var(--green)',
-  recovery: 'var(--green)',
-  moderate: 'var(--yellow)',
-  tempo: 'var(--orange)',
-  threshold: 'var(--red)',
-  hard: 'var(--red)',
-  longRun: 'var(--blue)',
-  progression: 'var(--purple)',
-  trail: 'var(--cyan)',
-  outline: 'var(--muted-foreground)',
+  easy: 'var(--color-data-categorical-green)',
+  recovery: 'var(--color-data-categorical-green)',
+  moderate: 'var(--color-data-categorical-brown)',
+  tempo: 'var(--color-data-categorical-orange)',
+  threshold: 'var(--color-data-categorical-red)',
+  hard: 'var(--color-data-categorical-red)',
+  longRun: 'var(--color-data-categorical-blue)',
+  progression: 'var(--color-data-categorical-purple)',
+  trail: 'var(--color-data-categorical-teal)',
+  outline: 'var(--color-text-secondary)',
 }
 
 /**
@@ -239,7 +245,7 @@ export function buildWeekFlowData(
         day: day.dayLabel,
         distance: 0,
         avgHR: null,
-        color: 'var(--input)',
+        color: 'var(--color-track)',
         type: 'Rest',
       }
     }

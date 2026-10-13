@@ -1,18 +1,29 @@
 'use client'
 
-import { useActionState } from 'react'
-import { buttonVariants } from '@/components/ui/button'
+import { useActionState, useState } from 'react'
+import { Trash2 } from 'lucide-react'
+import { Button } from '@astryxdesign/core/Button'
+import { DateInput } from '@astryxdesign/core/DateInput'
+import type { DateInputProps } from '@astryxdesign/core/DateInput'
+import { FieldStatus } from '@astryxdesign/core/FieldStatus'
+import { Icon } from '@astryxdesign/core/Icon'
+import { IconButton } from '@astryxdesign/core/IconButton'
+import { NumberInput } from '@astryxdesign/core/NumberInput'
+import { Selector } from '@astryxdesign/core/Selector'
+import { Table, pixel, proportional } from '@astryxdesign/core/Table'
+import { Text } from '@astryxdesign/core/Text'
+import { TextInput } from '@astryxdesign/core/TextInput'
 import { addLT2, removeLT2 } from '@/app/settings/lt2-actions'
 import type { LT2Benchmark } from '@/../lib/db'
+
+/** DateInput이 요구하는 YYYY-MM-DD 리터럴 타입. 패키지가 별칭을 내보내지 않아 prop에서 뽑아 쓴다. */
+type ISODateString = NonNullable<DateInputProps['value']>
 
 interface LT2BenchmarksProps {
   benchmarks: LT2Benchmark[]
 }
 
-const inputClass =
-  'w-full rounded-md border bg-muted px-3 py-2 text-sm focus:border-foreground focus:outline-none'
-
-const environments = [
+const ENVIRONMENTS = [
   { value: 'flat', label: '평지' },
   { value: 'incline_2', label: '경사 2%' },
   { value: 'incline_4', label: '경사 4%' },
@@ -28,113 +39,143 @@ function formatPace(seconds: number): string {
 }
 
 function getEnvLabel(env: string): string {
-  return environments.find((e) => e.value === env)?.label ?? env
+  return ENVIRONMENTS.find((e) => e.value === env)?.label ?? env
 }
+
+/** Astryx Table의 data-driven 모드는 행 타입이 Record를 만족해야 한다. */
+type BenchmarkRow = LT2Benchmark & Record<string, unknown>
 
 export function LT2Benchmarks({ benchmarks }: LT2BenchmarksProps): React.ReactElement {
   const [state, formAction, isPending] = useActionState(addLT2, null)
+  const [environment, setEnvironment] = useState(ENVIRONMENTS[0].value)
+  const [paceMin, setPaceMin] = useState<number | null>(null)
+  const [paceSec, setPaceSec] = useState<number | null>(null)
+  const [date, setDate] = useState<ISODateString | undefined>(undefined)
+  const [notes, setNotes] = useState('')
+
+  const columns = [
+    {
+      key: 'environment',
+      header: '환경',
+      width: proportional(1),
+      renderCell: (row: BenchmarkRow) => getEnvLabel(row.environment),
+    },
+    {
+      key: 'paceSeconds',
+      header: 'LT2 페이스',
+      align: 'end' as const,
+      width: proportional(1),
+      renderCell: (row: BenchmarkRow) => (
+        <Text hasTabularNumbers>{formatPace(row.paceSeconds)}/km</Text>
+      ),
+    },
+    {
+      key: 'date',
+      header: '날짜',
+      align: 'end' as const,
+      width: proportional(1),
+      renderCell: (row: BenchmarkRow) => (
+        <Text color="secondary" hasTabularNumbers>
+          {row.date}
+        </Text>
+      ),
+    },
+    {
+      key: 'actions',
+      header: '',
+      align: 'end' as const,
+      width: pixel(56),
+      renderCell: (row: BenchmarkRow) => (
+        <form action={removeLT2}>
+          <input type="hidden" name="id" value={row.id} />
+          <IconButton
+            label={`${getEnvLabel(row.environment)} 벤치마크 삭제`}
+            tooltip="삭제"
+            variant="ghost"
+            size="sm"
+            type="submit"
+            icon={<Icon icon={Trash2} size="sm" />}
+          />
+        </form>
+      ),
+    },
+  ]
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       {benchmarks.length > 0 && (
-        <table className="w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-b">
-              <th className="p-2 text-left text-muted-foreground">환경</th>
-              <th className="p-2 text-right text-muted-foreground">LT2 페이스</th>
-              <th className="p-2 text-right text-muted-foreground">날짜</th>
-              <th className="p-2 text-right text-muted-foreground" />
-            </tr>
-          </thead>
-          <tbody>
-            {benchmarks.map((b) => (
-              <tr key={b.id} className="border-b">
-                <td className="p-2">{getEnvLabel(b.environment)}</td>
-                <td className="p-2 text-right tabular-nums">{formatPace(b.paceSeconds)}/km</td>
-                <td className="p-2 text-right text-muted-foreground">{b.date}</td>
-                <td className="p-2 text-right">
-                  <form action={removeLT2}>
-                    <input type="hidden" name="id" value={b.id} />
-                    <button type="submit" className="text-xs text-red hover:underline">
-                      삭제
-                    </button>
-                  </form>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <Table<BenchmarkRow>
+          data={benchmarks as BenchmarkRow[]}
+          columns={columns}
+          idKey="id"
+          density="compact"
+        />
       )}
 
-      <form action={formAction} className="space-y-4">
+      <form action={formAction} className="flex flex-col gap-4">
         <div className="grid gap-4 sm:grid-cols-4">
-          <div className="space-y-1">
-            <label htmlFor="environment" className="text-xs font-medium">
-              환경
-            </label>
-            <select id="environment" name="environment" className={inputClass}>
-              {environments.map((e) => (
-                <option key={e.value} value={e.value}>
-                  {e.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="space-y-1">
-            <label htmlFor="pace_min" className="text-xs font-medium">
-              LT2 페이스 (/km)
-            </label>
-            <div className="flex items-center gap-1">
-              <input
-                type="number"
-                id="pace_min"
-                name="pace_min"
-                min={2}
-                max={10}
-                placeholder="분"
-                className={inputClass}
-              />
-              <span className="text-muted-foreground">:</span>
-              <input
-                type="number"
-                name="pace_sec"
-                min={0}
-                max={59}
-                placeholder="초"
-                className={inputClass}
-              />
-            </div>
-          </div>
-          <div className="space-y-1">
-            <label htmlFor="lt2_date" className="text-xs font-medium">
-              측정 날짜
-            </label>
-            <input type="date" id="lt2_date" name="date" className={inputClass} />
-          </div>
-          <div className="space-y-1">
-            <label htmlFor="lt2_notes" className="text-xs font-medium">
-              메모
-            </label>
-            <input
-              type="text"
-              id="lt2_notes"
-              name="notes"
-              placeholder="선택"
-              className={inputClass}
+          <Selector
+            label="환경"
+            htmlName="environment"
+            width="100%"
+            options={ENVIRONMENTS}
+            value={environment}
+            onChange={setEnvironment}
+          />
+          <div className="flex items-end gap-1">
+            <NumberInput
+              label="LT2 페이스 (분/km)"
+              htmlName="pace_min"
+              width="100%"
+              placeholder="분"
+              min={2}
+              max={10}
+              isIntegerOnly
+              value={paceMin}
+              hasClear
+              onChange={setPaceMin}
+            />
+            <NumberInput
+              label="초"
+              htmlName="pace_sec"
+              width="100%"
+              placeholder="초"
+              min={0}
+              max={59}
+              isIntegerOnly
+              value={paceSec}
+              hasClear
+              onChange={setPaceSec}
             />
           </div>
+          <div>
+            <DateInput label="측정 날짜" width="100%" value={date} onChange={setDate} />
+            <input type="hidden" name="date" value={date ?? ''} />
+          </div>
+          <TextInput
+            label="메모"
+            htmlName="notes"
+            width="100%"
+            placeholder="선택"
+            isOptional
+            value={notes}
+            onChange={setNotes}
+          />
         </div>
 
-        {state?.error && <p className="text-sm text-red">{state.error}</p>}
-        {state?.success && <p className="text-sm text-green">추가되었습니다.</p>}
+        {state?.error && <FieldStatus type="error" message={state.error} variant="detached" />}
+        {state?.success && (
+          <FieldStatus type="success" message="추가되었습니다." variant="detached" />
+        )}
 
-        <button
-          type="submit"
-          disabled={isPending}
-          className={buttonVariants({ variant: 'default' })}
-        >
-          {isPending ? '추가 중...' : 'LT2 벤치마크 추가'}
-        </button>
+        <div>
+          <Button
+            label={isPending ? '추가 중...' : 'LT2 벤치마크 추가'}
+            variant="primary"
+            type="submit"
+            isLoading={isPending}
+          />
+        </div>
       </form>
     </div>
   )

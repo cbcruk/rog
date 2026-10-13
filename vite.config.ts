@@ -5,7 +5,7 @@ export default defineConfig({
     '*': 'vp check --fix',
   },
   fmt: {
-    ignorePatterns: ['dist/**'],
+    ignorePatterns: ['dist/**', 'src/theme/built/**'],
     singleQuote: true,
     semi: false,
     sortPackageJson: true,
@@ -18,7 +18,8 @@ export default defineConfig({
     env: {
       builtin: true,
     },
-    ignorePatterns: ['.next/**', 'out/**', 'build/**', 'next-env.d.ts'],
+    // `src/theme/built/**`는 `astryx theme build` 산출물이라 손으로 고치지 않는다.
+    ignorePatterns: ['.next/**', 'out/**', 'build/**', 'next-env.d.ts', 'src/theme/built/**'],
     rules: {
       'no-array-constructor': 'error',
       'no-unused-expressions': 'error',

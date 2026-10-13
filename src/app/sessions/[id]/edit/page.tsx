@@ -1,5 +1,7 @@
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { Card } from '@astryxdesign/core/Card'
+import { Heading } from '@astryxdesign/core/Heading'
+import { Link as AstryxLink } from '@astryxdesign/core/Link'
 import { getSessionMeta } from '@/../lib/db'
 import { SessionMetaForm } from './session-meta-form'
 
@@ -16,14 +18,14 @@ export default async function EditSessionPage({
   if (!meta) notFound()
 
   return (
-    <div className="p-4 lg:p-6">
-      <Link href={`/sessions/${id}`} className="text-blue underline">
+    <div className="flex flex-col gap-4 p-4 lg:p-6">
+      <AstryxLink href={`/sessions/${id}`} isStandalone>
         ← 세션으로 돌아가기
-      </Link>
-      <h1 className="mt-4 mb-6 text-xl font-bold">세션 메타데이터 편집</h1>
-      <div className="rounded-lg border bg-muted p-6">
+      </AstryxLink>
+      <Heading level={1}>세션 메타데이터 편집</Heading>
+      <Card padding={6}>
         <SessionMetaForm id={id} meta={meta} />
-      </div>
+      </Card>
     </div>
   )
 }
