@@ -46,6 +46,8 @@ garmin.config.json
 /data
 /results
 sessions.db
+/fit.db
+/fit.db-*
 
 # claude code memory
 .claude/projects/
